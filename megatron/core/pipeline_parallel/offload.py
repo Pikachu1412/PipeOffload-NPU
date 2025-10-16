@@ -223,7 +223,7 @@ class ActivationStore(saved_tensors_hooks):
         else:
             assert(self._offload_tensor_info[len(self._gpu_store) - 1] == tensor_info(tensor))
         self._save_event.record()
-        print(f"rank {torch.distributed.get_rank()} Saving tensor id {len(self._gpu_store) - 1} {id(tensor)} {tensor.shape}, dtype {tensor.dtype}, device {tensor.device} storage {tensor.storage().data_ptr()}")
+        # print(f"rank {torch.distributed.get_rank()} Saving tensor id {len(self._gpu_store) - 1} {id(tensor)} {tensor.shape}, dtype {tensor.dtype}, device {tensor.device} storage {tensor.storage().data_ptr()}")
         return (ActivationStore.SaveType.OFFLOAD, len(self._gpu_store) - 1)
     
     def _resume_tensor(self, packed, remove_used=True):
