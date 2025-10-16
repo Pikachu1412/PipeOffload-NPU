@@ -1,0 +1,125 @@
+{
+    "model_configs": {
+        "vocab_size": 50304,
+        "hidden_size": 4096,
+        "ffn_hidden_size": 16384,
+        "seq_length": 2048,
+        "num_attention_heads": 32
+    },
+    "autopipeline_policy": [
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                4,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        },
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                4,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        },
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                3,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        },
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                4,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        },
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                4,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        },
+        {
+            "num_layers": 16,
+            "pipeline_model_parallel_size": 4,
+            "tensor_model_parallel_size": 1,
+            "ratio": 0.2,
+            "num_layer_list": [
+                4,
+                4,
+                4,
+                4
+            ],
+            "recompute_module_list": [
+                4,
+                3,
+                1,
+                0
+            ],
+            "recompute_type": 1
+        }
+    ]
+}
