@@ -6,8 +6,11 @@ from enum import Enum
 import os
 import re
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 from megatron.core import parallel_state
+from megatron.core.utils import record_wait_time
 
 
 def checksum(tensor):
@@ -17,15 +20,19 @@ def checksum(tensor):
         else:
             return 0
 
+
 def is_a_view(x, y):
     return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
+
 
 def tensor_info(tensor):
     return (tensor.shape, tensor.layout, tensor.dtype, tensor.stride())
 
+
 def save_rng_states():
     from megatron.core.tensor_parallel.random import get_cuda_rng_tracker
     return torch.get_rng_state(), torch.cuda.get_rng_state(), get_cuda_rng_tracker().get_states()
+
 
 def restore_rng_states(states):
     from megatron.core.tensor_parallel.random import get_cuda_rng_tracker, _set_cuda_rng_state
@@ -36,15 +43,16 @@ def restore_rng_states(states):
 
 class PartialRecompute(saved_tensors_hooks):
     class RecomputeSaveType(Enum):
-        PASS_THROUGH=1
-        RECOMPUTE=2
+        PASS_THROUGH = 1
+        RECOMPUTE = 2
+
     def _save_tensor(self, tensor):
         if self._next_recompute_tensor is not None and is_a_view(tensor, self._next_recompute_tensor[0]):
             packed = self._next_recompute_tensor[1:]
             self._next_recompute_tensor = None
             return PartialRecompute.RecomputeSaveType.RECOMPUTE, packed
         return PartialRecompute.RecomputeSaveType.PASS_THROUGH, tensor
-    
+
     def _resume_tensor(self, packed):
         type, info = packed
         if type == PartialRecompute.RecomputeSaveType.RECOMPUTE:
@@ -67,7 +75,23 @@ class PartialRecompute(saved_tensors_hooks):
         assert self._next_recompute_tensor is None
         self._next_recompute_tensor = (tensor, parents, function, rng_states)
 
+
 partial_recompute = PartialRecompute()
+
+# 全局线程池，用于异步等待offload完成并执行release
+# 使用较小的线程数，因为这些线程主要是等待GPU event
+_offload_release_thread_pool = None
+
+
+def get_offload_release_thread_pool():
+    """获取或创建全局的offload release线程池"""
+    global _offload_release_thread_pool
+    if _offload_release_thread_pool is None:
+        # 使用较小的线程池，因为主要是等待操作
+        _offload_release_thread_pool = ThreadPoolExecutor(
+            max_workers=4, thread_name_prefix="offload_release"
+        )
+    return _offload_release_thread_pool
 
 
 class PairedBarrier:
@@ -103,14 +127,16 @@ class PairedBarrier:
             cls.record()
         peer_handle = bytearray(len(cls.ipc_handle))
 
-        s = torch.distributed.isend(tensor=torch.frombuffer(bytearray(cls.ipc_handle), dtype=torch.uint8), dst=peer)
+        s = torch.distributed.isend(tensor=torch.frombuffer(
+            bytearray(cls.ipc_handle), dtype=torch.uint8), dst=peer)
         torch.distributed.recv(tensor=torch.frombuffer(peer_handle, dtype=torch.uint8), src=peer)
         s.wait()
 
         cls.last_event = None
         peer_event = torch.cuda.Event.from_ipc_handle(
-          torch.cuda.current_device(), bytes(peer_handle))
+            torch.cuda.current_device(), bytes(peer_handle))
         peer_event.wait()
+
 
 class FakeActivationStore:
     @classmethod
@@ -123,49 +149,53 @@ class FakeActivationStore:
     def resume(cls):
         with torch.cuda.stream(get_offload_h2d_stream()):
             PairedBarrier.wait_peer()
-        return 
+        return
+
     @classmethod
     def offload(cls):
         with torch.cuda.stream(get_offload_d2h_stream()):
             PairedBarrier.wait_peer()
         return
 
+
 class ActivationStore(saved_tensors_hooks):
     @classmethod
     def recompute_tensor(cls, tensor, parents, function, rng_states=None):
         return partial_recompute._recompute_tensor(tensor, parents, function, rng_states)
-            
+
     def __enter__(self):
-        assert not hasattr(ActivationStore, '_current_activation_store') or ActivationStore._current_activation_store is None, "Nested offload not supported"
+        assert not hasattr(
+            ActivationStore, '_current_activation_store') or ActivationStore._current_activation_store is None, "Nested offload not supported"
         ActivationStore._current_activation_store = self
         return super().__enter__()
 
     def __exit__(self, *args):
         super().__exit__(*args)
         ActivationStore._current_activation_store = None
-    
+
     class State(Enum):
-        NEW=0
-        SAVING=1
-        OFFLOADED=2
-        OFFLOAD_RELEASED=3
-        RESUME_PREPARED=4
-        RESUMED=5
-        RESUME_USED=6
-        RESUME_RELEASED=7
-    
+        NEW = 0
+        SAVING = 1
+        OFFLOADED = 2
+        OFFLOAD_RELEASED = 3
+        RESUME_PREPARED = 4
+        RESUMED = 5
+        RESUME_USED = 6
+        RESUME_RELEASED = 7
+
     def _change_state(self, from_state, to_state):
-        if isinstance(from_state, set):
-            assert self._state in from_state
-        else:
-            assert self._state == from_state
-        self._state = to_state
-    
+        with self._state_lock:
+            if isinstance(from_state, set):
+                assert self._state in from_state
+            else:
+                assert self._state == from_state, f"from_state {from_state} is not equal to current state {self._state}"
+            self._state = to_state
+
     class SaveType(Enum):
-        OFFLOAD=1
-        PASS_THROUGH=2
-        RECOMPUTE=3
-        ALIAS=4
+        OFFLOAD = 1
+        PASS_THROUGH = 2
+        RECOMPUTE = 3
+        ALIAS = 4
 
     def _save_tensor(self, tensor):
         assert not self._offloaded
@@ -174,7 +204,8 @@ class ActivationStore(saved_tensors_hooks):
         if not tensor.is_contiguous():
             # print(f"type is {type(tensor)}")
             tensor = tensor.contiguous()
-        self._change_state({ActivationStore.State.NEW, ActivationStore.State.SAVING}, ActivationStore.State.SAVING)
+        self._change_state({ActivationStore.State.NEW, ActivationStore.State.SAVING},
+                           ActivationStore.State.SAVING)
         if isinstance(tensor, torch.nn.parameter.Parameter):
             return ActivationStore.SaveType.PASS_THROUGH, tensor
         if tensor.numel() <= 1024:
@@ -186,11 +217,11 @@ class ActivationStore(saved_tensors_hooks):
             parent_handles = [self._save_tensor(x) for x in parents]
             return ActivationStore.SaveType.RECOMPUTE, (parent_handles, function, rng_states)
         if self.is_a_view_opti:
-        # 优化：使用哈希表查找，从 O(n) 降到 O(1)
+            # 优化：使用哈希表查找，从 O(n) 降到 O(1)
             storage_ptr = tensor.storage().data_ptr()
             tensor_offset = tensor.storage_offset()
             tensor_numel = tensor.numel()
-            
+
             if storage_ptr in self._storage_index_map:
                 # 查找所有具有相同 storage 的候选项
                 for index, stored_offset, stored_numel in self._storage_index_map[storage_ptr]:
@@ -205,7 +236,7 @@ class ActivationStore(saved_tensors_hooks):
             # 不是 view，需要保存新的 tensor
             new_index = len(self._gpu_store)
             self._gpu_store.append(tensor.data)
-            
+
             # 更新索引字典
             if storage_ptr not in self._storage_index_map:
                 self._storage_index_map[storage_ptr] = []
@@ -221,15 +252,16 @@ class ActivationStore(saved_tensors_hooks):
         if (len(self._offload_tensor_info) < len(self._gpu_store)):
             self._offload_tensor_info.append(tensor_info(tensor))
         else:
-            assert(self._offload_tensor_info[len(self._gpu_store) - 1] == tensor_info(tensor))
+            assert (self._offload_tensor_info[len(self._gpu_store) - 1] == tensor_info(tensor))
         self._save_event.record()
         # print(f"rank {torch.distributed.get_rank()} Saving tensor id {len(self._gpu_store) - 1} {id(tensor)} {tensor.shape}, dtype {tensor.dtype}, device {tensor.device} storage {tensor.storage().data_ptr()}")
         return (ActivationStore.SaveType.OFFLOAD, len(self._gpu_store) - 1)
-    
+
     def _resume_tensor(self, packed, remove_used=True):
         assert not self._offloaded
         type, info = packed
-        self._change_state({ActivationStore.State.RESUMED, ActivationStore.State.RESUME_USED}, ActivationStore.State.RESUME_USED)
+        self._change_state({ActivationStore.State.RESUMED,
+                           ActivationStore.State.RESUME_USED}, ActivationStore.State.RESUME_USED)
         if type == ActivationStore.SaveType.PASS_THROUGH:
             # print(f"In Resume rank:{torch.distributed.get_rank()} main_grad:{hasattr(info, 'main_grad')} Received tensor type: {info.__class__}, is Parameter: {isinstance(info, torch.nn.parameter.Parameter)}")
             return info
@@ -239,12 +271,14 @@ class ActivationStore(saved_tensors_hooks):
             return partial_recompute._resume_tensor((PartialRecompute.RecomputeSaveType.RECOMPUTE, (parents, function, rng_states)))
         if packed[0] == ActivationStore.SaveType.ALIAS:
             dtype, index, shape, stride, offset = packed[1]
-            self._resume_event.wait()
+            with record_wait_time("Resume Event ALIAS"):
+                self._resume_event.wait()
             # print(f"rank {torch.distributed.get_rank()} Resuming alias tensor id {index} {shape}, offset {offset}")
             bin, o = self.index_offset[index]
             return torch.as_strided(self._continuous_gpu_buffer[dtype][bin], shape, stride, o + offset)
         assert type == ActivationStore.SaveType.OFFLOAD
-        self._resume_event.wait()
+        with record_wait_time("Resume Event OFFLOAD"):
+            self._resume_event.wait()
         index = info
         ret = self._gpu_store[index]
         self._gpu_store[index] = None
@@ -262,7 +296,7 @@ class ActivationStore(saved_tensors_hooks):
         return ret
 
     def __init__(self, h2d_stream=None, d2h_stream=None, is_a_view_opti=False):
-        self._gpu_store=[]
+        self._gpu_store = []
         self._offloaded = False
         self._save_event = torch.cuda.Event()
         self._prepare_resume_event = torch.cuda.Event()
@@ -277,23 +311,29 @@ class ActivationStore(saved_tensors_hooks):
         self._offload_tensor_info = []
         self._index_offset = []
         self._index_cpu_buffer = []
-        
+
         # 优化：使用字典加速 view 查找
         self.is_a_view_opti = is_a_view_opti
         # key: storage_data_ptr, value: list of (index, storage_offset, numel)
         self._storage_index_map = {}
 
+        # 用于追踪异步release的Future对象
+        self._release_future = None
+
+        # 线程锁，用于保护状态变更（特别是异步模式下的状态同步）
+        self._state_lock = threading.Lock()
+
         self._state = ActivationStore.State.NEW
         super().__init__(self._save_tensor, self._resume_tensor)
-        
+
     def _allocate_cpu_buffers(self):
         if self._continuous_cpu_buffer is not None:
             return
-        alignment=64
-        
-        
+        alignment = 64
+
         def size_of_tensor(shape, stride):
-            id_stride = list(sorted([(i, s) for i, s in enumerate(stride) if shape[i] != 1], key=lambda x: x[1]))
+            id_stride = list(sorted([(i, s) for i, s in enumerate(
+                stride) if shape[i] != 1], key=lambda x: x[1]))
             size = 1
             for i, st in id_stride:
                 assert size == st, f"stride {stride} size {shape} not continuous"
@@ -303,7 +343,7 @@ class ActivationStore(saved_tensors_hooks):
         self.index_offset = []
 
         # dtype -> (size, id)
-        type_tensors=defaultdict(list)
+        type_tensors = defaultdict(list)
 
         for id, (shape, layout, dtype, stride) in enumerate(self._offload_tensor_info):
             assert layout == torch.strided
@@ -336,12 +376,12 @@ class ActivationStore(saved_tensors_hooks):
                 solution = {}
                 fit = True
                 for size, id in tensors:
-                    ok=False
+                    ok = False
                     for i in range(len(solution_bins)):
                         if current_bin[i] + size <= solution_bins[i]:
                             current_bin[i] += size
                             solution[id] = (i, current_bin[i] - size)
-                            ok=True
+                            ok = True
                             break
                     if not ok:
                         fit = False
@@ -350,7 +390,7 @@ class ActivationStore(saved_tensors_hooks):
                     assert len(solution) == len(tensors)
                     assert all([x > 0 for x in current_bin])
                     return current_bin, solution
-        
+
         import psutil
         print(f"rank {torch.distributed.get_rank()} before allocation rss {psutil.Process(os.getpid()).memory_info().rss / 1000000} MB")
         self._continuous_cpu_buffer = {}
@@ -367,44 +407,56 @@ class ActivationStore(saved_tensors_hooks):
                 torch.empty([size], dtype=dtype, pin_memory=True, device='cpu') for size in bins]
             for id, (bin, offset) in solution.items():
                 self.index_offset[id] = (bin, offset)
-            print(f"rank {torch.distributed.get_rank()} after allocation {dtype} {bins} elements rss {psutil.Process(os.getpid()).memory_info().rss / 1000000} MB")
+            # print(f"rank {torch.distributed.get_rank()} after allocation {dtype} {bins} elements rss {psutil.Process(os.getpid()).memory_info().rss / 1000000} MB")
 
         # Print stats
         for dtype, tensors in type_tensors.items():
             total_size = sum([x[0] for x in tensors])
             allocated_size = sum([x.numel() for x in self._continuous_cpu_buffer[dtype]])
-            aligned_size  = sum([nearest_power_of_2(x.numel()) for x in self._continuous_cpu_buffer[dtype]])
+            aligned_size = sum([nearest_power_of_2(x.numel())
+                               for x in self._continuous_cpu_buffer[dtype]])
             print(f"rank {torch.distributed.get_rank()} Allocated {allocated_size / 1000000} M elements for {len(tensors)} tensors of type {dtype} total length {total_size} aligned size {aligned_size}")
-        
 
         for index, (shape, layout, dtype, stride) in enumerate(self._offload_tensor_info):
             bin, offset = self.index_offset[index]
-            ctensor = torch.as_strided(self._continuous_cpu_buffer[dtype][bin], shape, stride, offset)
+            ctensor = torch.as_strided(
+                self._continuous_cpu_buffer[dtype][bin], shape, stride, offset)
             self._index_cpu_buffer.append(ctensor)
+
+    def _async_wait_and_release(self):
+        """后台线程：等待offload完成事件，然后自动执行offload_release"""
+        # 在后台线程中等待event完成
+        self._offload_complete_event.synchronize()
+        print(f"rank {torch.distributed.get_rank()} 调用offload release")
+        # Event完成后，在原始流的上下文中执行release
+        # with torch.cuda.stream(self._d2h_stream) if self._d2h_stream else contextlib.nullcontext():
+        self.offload_release()
 
     @torch.no_grad()
     # @torch.cuda.nvtx.range("Offload")
-    def offload(self):
+    def offload(self, auto_release=False):
         self._change_state(ActivationStore.State.SAVING, ActivationStore.State.OFFLOADED)
         assert not self._offloaded
-        
-        size=0
-        storage_size=0
+
+        size = 0
+        storage_size = 0
         storages = set()
-        
+
         with torch.cuda.stream(self._d2h_stream) if self._d2h_stream else contextlib.nullcontext():
-            self._save_event.wait()
+            with record_wait_time("Offload Event"):
+                self._save_event.wait()
+
             self._allocate_cpu_buffers()
             PairedBarrier.wait_peer()
             for index, tensor in enumerate(self._gpu_store):
                 buffer = self._index_cpu_buffer[index]
                 assert buffer.shape == tensor.shape
                 buffer.copy_(tensor, non_blocking=True)
-                size+=tensor.numel()
+                size += tensor.numel()
                 if tensor.storage().data_ptr() not in storages:
                     # print(f"rank {torch.distributed.get_rank()} Storage of tensor {tensor.shape} size {tensor.storage().size()/1000000} MB not in set")
                     storages.add(tensor.storage().data_ptr())
-                    storage_size+=tensor.storage().nbytes()
+                    storage_size += tensor.storage().nbytes()
                 else:
                     # print(f"rank {torch.distributed.get_rank()} Storage of tensor {tensor.shape} size {tensor.storage().size()/1000000} MB already in set")
                     pass
@@ -412,32 +464,56 @@ class ActivationStore(saved_tensors_hooks):
             PairedBarrier.record()
             self._offload_complete_event.record()
         # print(f"rank {torch.distributed.get_rank()} Offloaded {size / 1000000000} Billion elements, {len(self._gpu_store)} tensors, storage size {storage_size / 1000000000} GBytes")
-        
+
         self._offloaded = True
+
+        # 如果启用自动释放，提交任务到线程池
+        if auto_release:
+            thread_pool = get_offload_release_thread_pool()
+            self._release_future = thread_pool.submit(self._async_wait_and_release)
 
     @torch.no_grad()
     # @torch.cuda.nvtx.range("OffloadRelease")
     def offload_release(self):
         self._change_state(ActivationStore.State.OFFLOADED, ActivationStore.State.OFFLOAD_RELEASED)
+        # 使用锁确保状态读取的一致性
+        with self._state_lock:
+            current_state = self._state
+        print(f"rank {torch.distributed.get_rank()} offload_release后的state是{current_state}")
         assert self._offloaded
-        if self._d2h_stream is not None:
-            self._offload_complete_event.wait()
+        from megatron.training import get_args
+        if not get_args().async_offload and self._d2h_stream is not None:
+            with record_wait_time("Offload Complete Event"):
+                self._offload_complete_event.wait()
         self._gpu_store.clear()
+        # 清理future引用
+        self._release_future = None
 
     @torch.no_grad()
     # @torch.cuda.nvtx.range("PrepareResume")
     def prepare_resume(self):
-        self._change_state(ActivationStore.State.OFFLOAD_RELEASED, ActivationStore.State.RESUME_PREPARED)
+        # 如果启用了异步release，等待后台线程完成
+        if self._release_future is not None:
+            with record_wait_time("Async Offload Release Complete"):
+                print(f"rank {torch.distributed.get_rank()} 等待异步offload_release完成...")
+                self._release_future.result()  # 阻塞等待后台线程执行完offload_release
+                print(f"rank {torch.distributed.get_rank()} 异步offload_release已完成")
+        # 使用锁确保能读取到最新的状态
+        with self._state_lock:
+            current_state = self._state
+        print(f"prepare resume rank {torch.distributed.get_rank()} 现在的state是{current_state}")
+        self._change_state(ActivationStore.State.OFFLOAD_RELEASED,
+                           ActivationStore.State.RESUME_PREPARED)
         assert self._offloaded
         self._continuous_gpu_buffer = {
             dtype: [torch.empty_like(x, device='cuda') for x in bins] for dtype, bins in self._continuous_cpu_buffer.items()}
         for index, (shape, layout, dtype, stride) in enumerate(self._offload_tensor_info):
             bin, offset = self.index_offset[index]
-            gtensor = torch.as_strided(self._continuous_gpu_buffer[dtype][bin], shape, stride, offset)
+            gtensor = torch.as_strided(
+                self._continuous_gpu_buffer[dtype][bin], shape, stride, offset)
             self._gpu_store.append(gtensor)
-        
-        self._prepare_resume_event.record()
 
+        self._prepare_resume_event.record()
 
     @torch.no_grad()
     # @torch.cuda.nvtx.range("Resume")
@@ -446,8 +522,10 @@ class ActivationStore(saved_tensors_hooks):
         assert self._offloaded
         original_stream = torch.cuda.current_stream()
         with torch.cuda.stream(self._h2d_stream) if self._h2d_stream else contextlib.nullcontext():
-            self._prepare_resume_event.wait()
-            self._offload_complete_event.wait()
+            with record_wait_time("Prepare Resume Event"):
+                self._prepare_resume_event.wait()
+            with record_wait_time("Offload Complete Event"):
+                self._offload_complete_event.wait()
             PairedBarrier.wait_peer()
             for dtype, bins in self._continuous_cpu_buffer.items():
                 for (cpu, gpu) in zip(bins, self._continuous_gpu_buffer[dtype]):
@@ -462,22 +540,35 @@ class ActivationStore(saved_tensors_hooks):
         self._change_state(ActivationStore.State.RESUME_USED, ActivationStore.State.RESUME_RELEASED)
         assert all([x is None for x in self._gpu_store])
         assert all([all([x is None for x in y]) for y in self._continuous_gpu_buffer.values()])
-        self._resume_event.wait()
-        
+        with record_wait_time("Resume Release Event"):
+            self._resume_event.wait()
+
         self._gpu_store.clear()
         self._continuous_gpu_buffer.clear()
         self._storage_index_map.clear()  # 清空索引字典
 
     def reset_state(self):
         self._change_state(ActivationStore.State.RESUME_RELEASED, ActivationStore.State.NEW)
+        # 确保之前的异步release已完成
+        if self._release_future is not None:
+            try:
+                self._release_future.result(timeout=0.1)
+            except:
+                pass
+            self._release_future = None
+
 
 offload_stream = None
 d2h_stream = None
+
+
 def get_offload_h2d_stream():
     global offload_stream
     if offload_stream is None:
         offload_stream = torch.cuda.Stream()
     return offload_stream
+
+
 def get_offload_d2h_stream():
     from megatron.training import get_args
     if not get_args().offload_overlap_sr:
@@ -494,41 +585,47 @@ def get_offload_d2h_stream():
 # prepare_resume
 # resume
 # resume_release
+
+
 class ActivationStorePool:
-    def __init__(self, is_a_view_opti=False) -> None:
+    def __init__(self) -> None:
         self._pool = []
-        self._stage_queues = [[] for x in range (6)]
-        self.is_a_view_opti=is_a_view_opti
-    
-    def get_for_offload(self) -> ActivationStore:
+        self._stage_queues = [[] for x in range(6)]
+
+    def get_for_offload(self, is_a_view_opti=False) -> ActivationStore:
         if self._pool:
             ret = self._pool.pop(-1)
             ret.reset_state()
         else:
-            ret = ActivationStore(get_offload_h2d_stream(), get_offload_d2h_stream(), is_a_view_opti=self.is_a_view_opti)
+            ret = ActivationStore(get_offload_h2d_stream(),
+                                  get_offload_d2h_stream(), is_a_view_opti=is_a_view_opti)
+        self._current_store = ret
         self._stage_queues[0].append(ret)
         return ret
 
     def pop_call_push(self, stage_idx, func):
-        assert self._stage_queues[stage_idx]
+        assert self._stage_queues[stage_idx], f"stage_idx {stage_idx} is empty"
         store = self._stage_queues[stage_idx].pop(0)
         ret = func(store)
+        from megatron.training import get_args
+        if get_args().async_offload and stage_idx == 0:
+            stage_idx = 1
         self._stage_queues[stage_idx + 1].append(store)
         return ret
-    
-    def offload(self):
-        return self.pop_call_push(0, lambda x: x.offload())
-    
+
+    def offload(self, auto_release=False):
+        return self.pop_call_push(0, lambda x: x.offload(auto_release=auto_release))
+
     def offload_release(self):
         return self.pop_call_push(1, lambda x: x.offload_release())
-    
+
     def prepare_resume(self):
         return self.pop_call_push(2, lambda x: x.prepare_resume())
-    
+
     def resume(self):
         return self.pop_call_push(3, lambda x: x.resume())
-    
-    def resume_release(self, store_deprecated = None):
+
+    def resume_release(self, store_deprecated=None):
         self.pop_call_push(4, lambda x: x.resume_release())
         self._pool.append(self._stage_queues[5].pop(0))
 

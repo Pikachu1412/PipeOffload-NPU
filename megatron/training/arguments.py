@@ -1285,6 +1285,7 @@ def _add_training_args(parser):
     group.add_argument('--offload-overlap-sr', action='store_true',
                        help='overlap save and resume in offload')
     group.add_argument('--is-a-view-opti', action='store_true', help='优化is_a_view的查找速度')
+    group.add_argument('--async-offload', action='store_true', help='异步offload')
     return parser
 
 

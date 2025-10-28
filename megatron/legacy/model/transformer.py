@@ -29,6 +29,7 @@ from megatron.core.tensor_parallel import (
     get_data_parallel_rng_tracker_name,
     reduce_scatter_to_sequence_parallel_region_from_moe,
 )
+from megatron.core.pipeline_parallel.offload import ActivationStore, save_rng_states
 from megatron.legacy.model.enums import AttnMaskType, AttnType, LayerType
 from megatron.legacy.model.fused_bias_gelu import bias_gelu_impl
 from megatron.legacy.model.fused_softmax import FusedScaleMaskSoftmax
@@ -165,7 +166,11 @@ class ParallelMLP(MegatronModule):
         if self.bias_gelu_fusion:
             assert self.add_bias is True
             assert self.activation_func == F.gelu
-            intermediate_parallel = bias_gelu_impl(intermediate_parallel, bias_parallel)
+            intermediate_parallel_output = bias_gelu_impl(intermediate_parallel, bias_parallel)
+            if get_args().recompute_lgd:
+                ActivationStore.recompute_tensor(intermediate_parallel_output, [intermediate_parallel, bias_parallel], bias_gelu_impl)
+            intermediate_parallel = intermediate_parallel_output
+
         else:
             if bias_parallel is not None:
                 intermediate_parallel = intermediate_parallel + bias_parallel
@@ -1173,10 +1178,9 @@ class ParallelTransformerLayer(MegatronModule):
         # hidden_states: [s, b, h]
 
         # Layer norm at the beginning of the transformer layer.
-        m1 = torch.npu.memory_allocated()
         norm_output = self.input_norm(hidden_states)
-        m2 = torch.npu.memory_allocated()
-        print_rank_0(f"input_norm is {(m2-m1)//1024//1024}MB")
+        if get_args().recompute_lgd:
+            ActivationStore.recompute_tensor(norm_output, [hidden_states], self.input_norm)
         # Self attention.
         attention_output, attention_bias = \
             self.self_attention(
@@ -1184,8 +1188,7 @@ class ParallelTransformerLayer(MegatronModule):
                 attention_mask,
                 inference_params=inference_params,
                 rotary_pos_emb=rotary_pos_emb)
-        m3 = torch.npu.memory_allocated()
-        print_rank_0(f"self_att is {(m3-m2)//1024//1024}MB")
+
         # Residual connection.
         if self.apply_residual_connection_post_norm:
             residual = norm_output
@@ -1218,13 +1221,12 @@ class ParallelTransformerLayer(MegatronModule):
                                               p=self.hidden_dropout,
                                               training=self.training)
             norm_input = residual + self.drop_path(out)
-        m4 = torch.npu.memory_allocated()
-        print_rank_0(f"Residual connection and dropout is {(m4-m3)//1024//1024}MB")
+
         # Layer norm post the self attention.
         norm_output = self.post_attention_norm(norm_input)
-        m5 = torch.npu.memory_allocated()
-        print_rank_0(f"post_attention_norm is {(m5-m4)//1024//1024}MB")
-        
+        if get_args().recompute_lgd:
+            ActivationStore.recompute_tensor(norm_output, [norm_input], self.post_attention_norm)
+  
         # Cross attention.
         if self.layer_type == LayerType.encoder:
             pass
@@ -1259,11 +1261,7 @@ class ParallelTransformerLayer(MegatronModule):
                             self.layer_type.name)
 
         # MLP.
-        m6 = torch.npu.memory_allocated() # m6==m5
-        
         mlp_output, mlp_bias = self.mlp(norm_output)
-        m7 = torch.npu.memory_allocated()
-        print_rank_0(f"mlp is {(m7-m6)//1024//1024}MB")
         # Second residual connection.
         if self.apply_residual_connection_post_norm:
             residual = norm_output
@@ -1297,8 +1295,6 @@ class ParallelTransformerLayer(MegatronModule):
                                               p=self.hidden_dropout,
                                               training=self.training)
             output = residual + self.drop_path(out)
-        m8 = torch.npu.memory_allocated()
-        print_rank_0(f"Second Residual connection and dropout is {(m8-m7)//1024//1024}MB")
         if self.layer_type == LayerType.retro_decoder_with_retriever:
             return output, retriever_output
         else:
@@ -1388,7 +1384,7 @@ class ParallelTransformer(MegatronModule):
                  drop_path_rate=0.0):
         super(ParallelTransformer, self).__init__()
         args = get_args()
-
+        self.offset = 0
         self.layer_type = layer_type
         self.model_type = model_type
         self.bf16 = config.bf16
@@ -1547,7 +1543,7 @@ class ParallelTransformer(MegatronModule):
             # layers to stages like (each list is a model chunk):
             # Stage 0: [0, 1]  [4, 5]
             # Stage 1: [2, 3]  [6, 7]
-            offset = mpu.get_virtual_pipeline_model_parallel_rank() * (
+            self.offset = mpu.get_virtual_pipeline_model_parallel_rank() * (
                 config.num_layers // config.virtual_pipeline_model_parallel_size) + \
                 (mpu.get_pipeline_model_parallel_rank() * self.num_layers)
         else:
@@ -1556,12 +1552,12 @@ class ParallelTransformer(MegatronModule):
                     mpu.get_pipeline_model_parallel_world_size() > 1:
                 pipeline_rank = mpu.get_pipeline_model_parallel_rank()
                 if layer_type == LayerType.encoder:
-                    offset = pipeline_rank * self.num_layers
+                    self.offset = pipeline_rank * self.num_layers
                 else:
                     num_ranks_in_enc = args.pipeline_model_parallel_split_rank
-                    offset = (pipeline_rank - num_ranks_in_enc) * self.num_layers
+                    self.offset = (pipeline_rank - num_ranks_in_enc) * self.num_layers
             else:
-                offset = mpu.get_pipeline_model_parallel_rank() * self.num_layers
+                self.offset = mpu.get_pipeline_model_parallel_rank() * self.num_layers
 
         if self.num_layers == 0:
             # When a standalone embedding stage is used (e.g.,
@@ -1575,8 +1571,9 @@ class ParallelTransformer(MegatronModule):
             self.num_layers = 1
             self.layers = torch.nn.ModuleList([ NoopTransformerLayer(1) ])
         else:
+            print(f"In build_layer self.offset is {self.offset}")
             self.layers = torch.nn.ModuleList(
-                [build_layer(i + 1 + offset) for i in range(self.num_layers)])
+                [build_layer(i + 1 + self.offset) for i in range(self.num_layers)])
 
             # Update dropout rate for Retro encoder.
             if model_type == ModelType.retro_encoder:
@@ -1771,8 +1768,8 @@ class ParallelTransformer(MegatronModule):
                         forward_kwargs['retriever_output'] = retriever_output
                         forward_kwargs['retriever_attn_mask'] = retriever_attn_mask
 
-                    for index in range(self.num_layers):
-                        print_rank_0(f"now the layer is {index}")
+                    for index in range(self.num_layers):                  
+                        print(f"rank {get_args().rank} now the layer is {index + self.offset}")
                         layer = self._get_layer(index)
 
                         hidden_states = layer(
@@ -1787,8 +1784,8 @@ class ParallelTransformer(MegatronModule):
                             assert len(hidden_states) == 2
                             hidden_states, retriever_output = hidden_states
                             forward_kwargs["retriever_output"] = retriever_output
-                        print_rank_0("after layer...")
-                        print_memory_status()
+                        # print_rank_0("after layer...")
+                        # print_memory_status()
 
                 # Skip counter update for eval and activation checkpointing
                 if torch.is_grad_enabled() and self.training:

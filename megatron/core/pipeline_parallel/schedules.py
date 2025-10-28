@@ -20,7 +20,7 @@ from megatron.core.utils import (
 
 from megatron.core.pipeline_parallel.offload import ActivationStorePool, partial_recompute, FakeActivationStore
 from megatron.training import get_args
-activation_store_pool = ActivationStorePool(is_a_view_opti=True)
+activation_store_pool = ActivationStorePool()
 
 
 # Types
@@ -1295,6 +1295,7 @@ def forward_backward_pipelining_without_interleaving(
     
     Returns dictionary with losses if the last stage, empty dict otherwise."""
 
+    args = get_args()
     if isinstance(model, list):
         assert (
             len(model) == 1
@@ -1400,12 +1401,12 @@ def forward_backward_pipelining_without_interleaving(
     #       offload stream       : RRRSSSRRRSSSRRRSSS
     
     is_eager_stage = parallel_state.get_pipeline_model_parallel_rank() % 2 == 0
-    if not get_args().paired_barrier:
+    if not args.paired_barrier:
         is_eager_stage = True
     # Run warmup forward passes.
     import psutil
     process = psutil.Process()
-    do_offload = get_args().cpu_offload and parallel_state.get_pipeline_model_parallel_rank() + 2 < parallel_state.get_pipeline_model_parallel_world_size()
+    do_offload = args.cpu_offload and parallel_state.get_pipeline_model_parallel_rank() + 2 < parallel_state.get_pipeline_model_parallel_world_size()
     def save_input_tensor(input_tensor):
         if not do_offload:
             return
@@ -1439,7 +1440,7 @@ def forward_backward_pipelining_without_interleaving(
                 activation_store_pool.prepare_resume()
                 activation_store_pool.resume()
             
-        save_act = activation_store_pool.get_for_offload() if do_offload else partial_recompute#contextlib.nullcontext()#
+        save_act = activation_store_pool.get_for_offload(is_a_view_opti=args.is_a_view_opti) if do_offload else partial_recompute#contextlib.nullcontext()#
         
         # print(f"rank {rank} mb {i} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         with save_act:
@@ -1461,11 +1462,14 @@ def forward_backward_pipelining_without_interleaving(
         send_forward(output_tensor, send_tensor_shapes, config)
         if do_offload:
             save_input_tensor(input_tensor)
-            activation_store_pool.offload()
-            if is_eager_stage:
-                if i < num_warmup_microbatches - 1:
-                    FakeActivationStore().resume()
-            activation_store_pool.offload_release()
+            
+            activation_store_pool.offload(auto_release=args.async_offload)
+            if not args.async_offload:            
+                activation_store_pool.offload_release()
+            # if is_eager_stage:
+            #     if i < num_warmup_microbatches - 1:
+            #         FakeActivationStore().resume()
+            
         total_num_tokens += num_tokens.item()
 
         if not forward_only:
@@ -1496,7 +1500,7 @@ def forward_backward_pipelining_without_interleaving(
             ) >= config.num_microbatches_with_partial_activation_checkpoints
         else:
             checkpoint_activations_microbatch = None
-        print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
+        # print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         if do_offload:
             if is_eager_stage:
                 activation_store_pool.resume()
@@ -1507,7 +1511,7 @@ def forward_backward_pipelining_without_interleaving(
             # if last_resume_act is not None:
             #     activation_store_pool.release(last_resume_act)
             # last_resume_act = resume_act
-            save_act = activation_store_pool.get_for_offload()
+            save_act = activation_store_pool.get_for_offload(is_a_view_opti=args.is_a_view_opti)
         else:
             save_act = partial_recompute#contextlib.nullcontext()#
         # print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB")
@@ -1536,7 +1540,7 @@ def forward_backward_pipelining_without_interleaving(
             if is_eager_stage:
                 activation_store_pool.prepare_resume()
             else:
-                activation_store_pool.offload()
+                activation_store_pool.offload(auto_release=args.async_offload)
         # print(f"S1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         total_num_tokens += num_tokens.item()
 
@@ -1552,7 +1556,7 @@ def forward_backward_pipelining_without_interleaving(
             )
             # For even stages, do offload after communication to avoid deadlock on CPU.
             if do_offload and is_eager_stage:
-                activation_store_pool.offload()
+                activation_store_pool.offload(auto_release=args.async_offload)
 
             # Add input_tensor and output_tensor to end of list.
             input_tensors.append(input_tensor)
@@ -1580,7 +1584,8 @@ def forward_backward_pipelining_without_interleaving(
             # print(f"B1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
             if do_offload:
                 activation_store_pool.resume_release()
-                activation_store_pool.offload_release()
+                if not args.async_offload:
+                    activation_store_pool.offload_release()
             if last_iteration:
                 input_tensor = None
                 send_backward(input_tensor_grad, recv_tensor_shapes, config)

@@ -1217,7 +1217,7 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
                         torch_npu.profiler.ProfilerActivity.NPU
                         ],
                 schedule=torch_npu.profiler.schedule(wait=max(args.profile_step_start-1, 0),
-                    warmup=1 if args.profile_step_start > 0 else 0,
+                    warmup=2 if args.profile_step_start > 0 else 0,
                     active=args.profile_step_end-args.profile_step_start,
                     repeat=1),
                 on_trace_ready=torch_npu.profiler.tensorboard_trace_handler(args.tensorboard_dir),

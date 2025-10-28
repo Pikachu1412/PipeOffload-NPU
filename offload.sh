@@ -3,7 +3,7 @@
 
 #SBATCH <SLURM OPTIONS> --nodes=128 --exclusive --ntasks-per-node=8 --job-name=megatron_gpt3_175b
 export VSCODE_DEBUG=0
-export CONNECT_RANKS=0
+export CONNECT_RANKS=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3
 DIR=`pwd`
@@ -29,7 +29,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export WORLD_SIZE=1
 export RANK=0
 export MASTER_ADDR=localhost
-export MASTER_PORT=1234
+export MASTER_PORT=5678
 GPUS_PER_NODE=4
 EXIT_INTERVAL=10
 LOG_INTERVAL=10
@@ -56,7 +56,7 @@ EVAL_INTERVAL=10000
 
 
 TP_SIZE=1
-SEQ_LENGTH=4096
+SEQ_LENGTH=$((1024*6))
 # FFN_HIDDEN_SIZE=$(( $HIDDEN_SIZE * 4 ))
 
 
@@ -107,9 +107,10 @@ options=" \
   --use-distributed-optimizer 
   "
 OFFLOAD_ARGS=(
-  # --is-a-view-opti
-  --tensorboard-dir ./logs/legacy_offload_opti
+  --is-a-view-opti
+  --tensorboard-dir ./logs/legacy_offload_recompute_true
   --cpu-offload 
+  --async-offload
   --no-paired-barrier
   --optimizer-selection fused_torch_adamw 
   --offload-overlap-sr
@@ -118,7 +119,7 @@ OFFLOAD_ARGS=(
   --use-legacy-models
   --ckpt-format torch
   --profile
-  --profile-ranks 0 1 2 3
+  --profile-ranks 0 1
   --use-pytorch-profiler
   --profile-step-start 3
   --profile-step-end 5

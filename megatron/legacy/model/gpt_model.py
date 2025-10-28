@@ -80,7 +80,7 @@ class GPTModel(MegatronModule):
                 retriever_attn_mask=None,
                 labels=None, tokentype_ids=None, inference_params=None):
         print_rank_0('GPTModel forward')
-        m1 = torch.npu.memory_allocated()
+       
         lm_output = self.language_model(
             input_ids,
             position_ids,
@@ -89,9 +89,7 @@ class GPTModel(MegatronModule):
             retriever_position_ids=retriever_position_ids,
             retriever_attn_mask=retriever_attn_mask,
             inference_params=inference_params)
-        m2 = torch.npu.memory_allocated()
        
-        print_rank_0(f"GPTModel forward after language model, {(m2 - m1)//1024//1024}")
         if self.post_process:
             return post_language_model_processing(
                 lm_output, labels,

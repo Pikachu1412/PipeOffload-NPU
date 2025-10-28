@@ -2,6 +2,7 @@
 
 """Utility functions used throughout Megatron core"""
 import array
+from contextlib import contextmanager
 import hashlib
 import logging
 import math
@@ -14,7 +15,7 @@ import time
 import traceback
 from dataclasses import dataclass
 from datetime import datetime
-from functools import reduce
+from functools import reduce, wraps
 from importlib.metadata import version
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
@@ -1333,3 +1334,24 @@ def is_npu_available() -> bool:
         _NPU_AVAILABLE = False
 
     return _NPU_AVAILABLE
+
+def timing_wait(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(self, *args, **kwargs)
+        wait_time = (time.perf_counter() - start_time) * 1000
+        print(f"Wait time: {wait_time:.4f} ms")
+        return result
+    return wrapper
+
+@contextmanager
+def record_wait_time(event_name: str = "event"):
+    # return
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        # torch.cuda.synchronize()
+        wait_time = (time.perf_counter() - start_time) * 1000
+        print(f"{event_name} wait time: {wait_time:.4f} ms")

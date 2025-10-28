@@ -10,7 +10,6 @@ local/
 .gitmodules
 # User files
 logs/
-test_*.py
 kernel_meta/
 output/
 history_profile_dir/
