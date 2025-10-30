@@ -1345,13 +1345,13 @@ def timing_wait(func):
         return result
     return wrapper
 
-@contextmanager
-def record_wait_time(event_name: str = "event"):
-    # return
-    start_time = time.perf_counter()
-    try:
-        yield
-    finally:
-        # torch.cuda.synchronize()
-        wait_time = (time.perf_counter() - start_time) * 1000
-        print(f"{event_name} wait time: {wait_time:.4f} ms")
+# @contextmanager
+# def record_wait_time(event_name: str = "event"):
+#     return
+#     start_time = time.perf_counter()
+#     try:
+#         yield
+#     finally:
+#         # torch.cuda.synchronize()
+#         wait_time = (time.perf_counter() - start_time) * 1000
+#         print(f"{event_name} wait time: {wait_time:.4f} ms")

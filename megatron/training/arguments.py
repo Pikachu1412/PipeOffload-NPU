@@ -69,7 +69,6 @@ def parse_args(extra_args_provider=None, ignore_unknown_args=False):
             "Yaml config is not supported with legacy models."
         args = load_yaml(args.yaml_cfg)
 
-
     # Args from environment
     args.rank = int(os.getenv('RANK', '0'))
     args.world_size = int(os.getenv("WORLD_SIZE", '1'))
@@ -172,8 +171,10 @@ def validate_args(args, defaults={}):
     if args.encoder_pipeline_model_parallel_size > 0 and args.encoder_tensor_model_parallel_size == 0:
         args.encoder_tensor_model_parallel_size = args.tensor_model_parallel_size
 
-    encoder_model_size = args.encoder_tensor_model_parallel_size * args.encoder_pipeline_model_parallel_size * args.context_parallel_size
-    decoder_model_size = args.tensor_model_parallel_size * args.pipeline_model_parallel_size * args.context_parallel_size
+    encoder_model_size = args.encoder_tensor_model_parallel_size * \
+        args.encoder_pipeline_model_parallel_size * args.context_parallel_size
+    decoder_model_size = args.tensor_model_parallel_size * \
+        args.pipeline_model_parallel_size * args.context_parallel_size
     total_model_size = encoder_model_size + decoder_model_size
 
     # Total model size.
@@ -246,7 +247,7 @@ def validate_args(args, defaults={}):
                 print('WARNING: overriding default arguments for {key}:{v} \
                        with {key}:{v2}'.format(key=key, v=defaults[key],
                                                v2=getattr(args, key)),
-                                               flush=True)
+                      flush=True)
         else:
             setattr(args, key, defaults[key])
 
@@ -562,7 +563,7 @@ def validate_args(args, defaults={}):
         assert not args.use_legacy_models, "Context parallelism is not supported in legacy models."
 
     # Expert parallelism check
-    if args.expert_model_parallel_size  > 1:
+    if args.expert_model_parallel_size > 1:
         assert args.num_experts is not None, "num_experts must be non None to use expert model parallelism"
         assert args.num_experts % args.expert_model_parallel_size == 0, \
             "Number of experts should be a multiple of expert model parallel_size."
@@ -575,9 +576,9 @@ def validate_args(args, defaults={}):
 
     # Data blend checks
     assert args.mock_data + \
-           bool(args.data_path) + \
-           any([args.train_data_path, args.valid_data_path, args.test_data_path]) \
-           <= 1, "A single data source must be provided in training mode, else None"
+        bool(args.data_path) + \
+        any([args.train_data_path, args.valid_data_path, args.test_data_path]) \
+        <= 1, "A single data source must be provided in training mode, else None"
 
     if args.use_tp_pp_dp_mapping:
         assert args.context_parallel_size * args.expert_model_parallel_size <= 1, \
@@ -671,8 +672,8 @@ def core_transformer_config_from_args(args, config_class=None):
     kw_args['batch_p2p_comm'] = not args.overlap_p2p_comm
     kw_args['num_moe_experts'] = args.num_experts
     kw_args['rotary_interleaved'] = args.rotary_interleaved
-    kw_args['first_pipeline_num_layers']= args.decoder_first_pipeline_num_layers
-    kw_args['last_pipeline_num_layers']= args.decoder_last_pipeline_num_layers
+    kw_args['first_pipeline_num_layers'] = args.decoder_first_pipeline_num_layers
+    kw_args['last_pipeline_num_layers'] = args.decoder_last_pipeline_num_layers
     if args.swiglu:
         kw_args['activation_func'] = F.silu
         kw_args['gated_linear_unit'] = True
@@ -726,6 +727,7 @@ def _add_transformer_engine_args(parser):
                             'dtype) and perform the param all-gather in fp8.')
 
     return parser
+
 
 def _add_inference_args(parser):
     group = parser.add_argument_group(title='inference')
@@ -822,7 +824,7 @@ def _add_network_size_args(parser):
                        '   args.hidden_size // args.num_attention_heads '
                        'if not provided.')
     group.add_argument('--group-query-attention', action='store_true',
-                          help='Use group-query attention.')
+                       help='Use group-query attention.')
     group.add_argument('--num-query-groups', type=int, default=1)
 
     group.add_argument('--max-position-embeddings', type=int, default=None,
@@ -839,7 +841,7 @@ def _add_network_size_args(parser):
     group.add_argument('--rotary-percent', type=float, default=1.0,
                        help='Percent of rotary dimension to use, default 100%%')
     group.add_argument('--rotary-interleaved', action='store_true',
-                          help='Use interleaved rotary embedding.')
+                       help='Use interleaved rotary embedding.')
     group.add_argument('--rotary-seq-len-interpolation-factor', type=int, default=None,
                        help='Sequence length interpolation factor for rotary embeddings.')
     group.add_argument('--no-position-embedding',
@@ -952,7 +954,7 @@ def _add_logging_args(parser):
                        'number of floating-point operations) to progress.txt file in checkpoint '
                        'directory.')
     group.add_argument('--timing-log-level', type=int,
-                       default=0, choices=range(0,3),
+                       default=0, choices=range(0, 3),
                        help='Granularity level to measure and report timing. '
                        '   0: report only iteration time and make sure timing '
                        '      does not introduce extra overhead.'
@@ -1143,7 +1145,7 @@ def _add_training_args(parser):
                              'pipelining the GEMM and Reduce-Scatter.'),
                        dest='tp_comm_overlap_rs')
     group.add_argument('--tp-comm-overlap-rs-dgrad', action='store_true',
-                       help = 'Enables the Reduce-Scatter overlap with dgrad GEMM.',
+                       help='Enables the Reduce-Scatter overlap with dgrad GEMM.',
                        dest='tp_comm_overlap_rs_dgrad')
     group.add_argument('--disable-tp-comm-bulk-dgrad', action='store_false',
                        help='Disables the All-Gather overlap with bprop activation gradient GEMM.',
@@ -1277,15 +1279,20 @@ def _add_training_args(parser):
                        help='Disables the Reduce-Scatter overlap with fprop GEMM.',
                        dest='tp_comm_split_rs')
     group.add_argument('--cpu-offload', action='store_true', help='Offload activation to CPU.')
-    group.add_argument('--recompute-lgd', action='store_true', help='Recompute layernorm, gelu and dropout.')
-    group.add_argument('--no-paired-barrier', action='store_false', help='Disable paired barrier for offload.', dest='paired_barrier')
-    group.add_argument('--measure-activation-memory', action='store_true', help='Measure activation memory.')
-    group.add_argument('--offload-continuous-buffers', action='store_true', help='Use continuous buffers in offload.')
+    group.add_argument('--recompute-lgd', action='store_true',
+                       help='Recompute layernorm, gelu and dropout.')
+    group.add_argument('--no-paired-barrier', action='store_false',
+                       help='Disable paired barrier for offload.', dest='paired_barrier')
+    group.add_argument('--measure-activation-memory', action='store_true',
+                       help='Measure activation memory.')
+    group.add_argument('--offload-continuous-buffers', action='store_true',
+                       help='Use continuous buffers in offload.')
     group.add_argument('--adaptive-recompute', action='store_true', help='Adaptive recompute.')
     group.add_argument('--offload-overlap-sr', action='store_true',
                        help='overlap save and resume in offload')
     group.add_argument('--is-a-view-opti', action='store_true', help='优化is_a_view的查找速度')
     group.add_argument('--async-offload', action='store_true', help='异步offload')
+    group.add_argument('--bind-cpu', action='store_true', help='NUMA 绑定cpu')
     return parser
 
 
@@ -1391,10 +1398,10 @@ def _add_checkpointing_args(parser):
     group.add_argument('--non-persistent-ckpt-type', type=str, default=None,
                        choices=['global', 'local', 'in_memory', None],
                        help='Type of non-persistent model checkpoints. '
-                           '"global" - Saved as a standard checkpoint (e.g., on Lustre) with old checkpoints being removed. '
-                           '"local" - [TBD] Each rank saves a portion of the checkpoint locally (e.g., on SSD/ramdisk). '
-                           '"in_memory" - [TBD] A special kind of local checkpoint that avoids serialization. '
-                           'None - No non-persistent checkpointing (default option).')
+                       '"global" - Saved as a standard checkpoint (e.g., on Lustre) with old checkpoints being removed. '
+                       '"local" - [TBD] Each rank saves a portion of the checkpoint locally (e.g., on SSD/ramdisk). '
+                       '"in_memory" - [TBD] A special kind of local checkpoint that avoids serialization. '
+                       'None - No non-persistent checkpointing (default option).')
     group.add_argument('--non-persistent-global-ckpt-dir', type=str, default=None,
                        help='Directory containing global non-persistent model checkpoints.')
     group.add_argument('--non-persistent-local-ckpt-dir', type=str, default=None,
@@ -1528,11 +1535,11 @@ def _add_distributed_args(parser):
     group.add_argument('--decoder-first-pipeline-num-layers',
                        type=int, default=None,
                        help=('The number of transformer layers on the first pipeline stage of the decoder. '
-                       'Default None is even split of transformer layers across all pipeline stages'))
+                             'Default None is even split of transformer layers across all pipeline stages'))
     group.add_argument('--decoder-last-pipeline-num-layers',
                        type=int, default=None,
                        help=('The number of transformer layers on the last pipeline stage of the decoder. '
-                       'Default None is even split of transformer layers across all pipeline stages'))
+                             'Default None is even split of transformer layers across all pipeline stages'))
     group.add_argument('--model-parallel-size', type=int, default=None,
                        help='Old model parallel argument, do not use. Use '
                        '--tensor-model-parallel-size instead.')
@@ -1585,7 +1592,7 @@ def _add_distributed_args(parser):
                        'skips DDP initialization and returns function to '
                        'complete it instead.Also turns on '
                        '--use-cpu-initialization flag. This is for '
-                       'external DDP manager.' )
+                       'external DDP manager.')
     group.add_argument('--standalone-embedding-stage', action='store_true',
                        default=False, help='If set, *input* embedding layer '
                        'is placed on its own pipeline stage, without any '
@@ -1601,9 +1608,9 @@ def _add_distributed_args(parser):
                        'group cluster size of each communicator can be configured by '
                        'setting `min_ctas`, `max_ctas`, and `cga_cluster_size`.')
     group.add_argument('--use-tp-pp-dp-mapping', action='store_true', default=False,
-                        help='If set, distributed ranks initialize order is changed '
-                        'from tp-dp-pp to tp-pp-dp. Make sure EP and CP aren\'t used '
-                        'with this option enabled')
+                       help='If set, distributed ranks initialize order is changed '
+                       'from tp-dp-pp to tp-pp-dp. Make sure EP and CP aren\'t used '
+                       'with this option enabled')
     return parser
 
 
@@ -1616,7 +1623,8 @@ def _add_validation_args(parser):
     group.add_argument('--eval-interval', type=int, default=1000,
                        help='Interval between running evaluation on '
                        'validation set.')
-    group.add_argument("--test-mode", action="store_true", help='Run all real-time test alongside the experiment.')
+    group.add_argument("--test-mode", action="store_true",
+                       help='Run all real-time test alongside the experiment.')
     group.add_argument('--skip-train', action='store_true',
                        default=False, help='If set, bypass the training loop, '
                        'optionally do evaluation for validation/test, and exit.')
@@ -1745,13 +1753,13 @@ def _add_biencoder_args(parser):
     # network size
     group.add_argument('--ict-head-size', type=int, default=None,
                        help='Size of block embeddings to be used in ICT and '
-                        'REALM (paper default: 128)')
+                       'REALM (paper default: 128)')
     group.add_argument('--biencoder-projection-dim', type=int, default=0,
                        help='Size of projection head used in biencoder (paper'
-                        ' default: 128)')
+                       ' default: 128)')
     group.add_argument('--biencoder-shared-query-context-model', action='store_true',
-                        help='Whether to share the parameters of the query '
-                        'and context models or not')
+                       help='Whether to share the parameters of the query '
+                       'and context models or not')
 
     # checkpointing
     group.add_argument('--ict-load', type=str, default=None,
@@ -1773,18 +1781,18 @@ def _add_biencoder_args(parser):
 
     # training
     group.add_argument('--retriever-report-topk-accuracies', nargs='+', type=int,
-                        default=[], help="Which top-k accuracies to report "
-                        "(e.g. '1 5 20')")
+                       default=[], help="Which top-k accuracies to report "
+                       "(e.g. '1 5 20')")
     group.add_argument('--retriever-score-scaling', action='store_true',
                        help='Whether to scale retriever scores by inverse '
-                        'square root of hidden size')
+                       'square root of hidden size')
 
     # faiss index
     group.add_argument('--block-data-path', type=str, default=None,
                        help='Where to save/load BlockData to/from')
     group.add_argument('--embedding-path', type=str, default=None,
                        help='Where to save/load Open-Retrieval Embedding'
-                        ' data to/from')
+                       ' data to/from')
 
     # indexer
     group.add_argument('--indexer-batch-size', type=int, default=128,
@@ -1867,6 +1875,7 @@ def _add_vision_args(parser):
 
     return parser
 
+
 def _add_moe_args(parser):
     group = parser.add_argument_group(title="moe")
     group.add_argument('--expert-model-parallel-size', type=int, default=1,
@@ -1912,6 +1921,7 @@ def _add_moe_args(parser):
 
     return parser
 
+
 def _add_experimental_args(parser):
     group = parser.add_argument_group(title='experimental')
 
@@ -1935,5 +1945,5 @@ def _add_experimental_args(parser):
                        'override pattern must match number in the overidden'
                        'pattern')
     group.add_argument('--yaml-cfg', type=str, default=None,
-                       help = 'Config file to add additional arguments')
+                       help='Config file to add additional arguments')
     return parser

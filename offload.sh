@@ -3,7 +3,7 @@
 
 #SBATCH <SLURM OPTIONS> --nodes=128 --exclusive --ntasks-per-node=8 --job-name=megatron_gpt3_175b
 export VSCODE_DEBUG=0
-export CONNECT_RANKS=1
+export CONNECT_RANKS=0
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3
 DIR=`pwd`
@@ -38,12 +38,13 @@ WORLD_SIZE_IN_GPUS=$(( $WORLD_SIZE * $GPUS_PER_NODE ))
 PIPELINE_SIZE=4
 LAYERS=$(( $PIPELINE_SIZE * 2))
 MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=$(( $PIPELINE_SIZE * 2 * $MICRO_BATCH_SIZE ))
+GLOBAL_BATCH_SIZE=$(( 8 ))
 HIDDEN_SIZE=4096
 FFN_HIDDEN_SIZE=16384
 ATTENTION_HEADS=32
 GQA=8
-
+TP_SIZE=1
+SEQ_LENGTH=$((4096))
 
 # profile_ranks="0"
 # for ((i = 1; i < $WORLD_SIZE_IN_GPUS; i++)); do
@@ -55,8 +56,7 @@ EVAL_INTERVAL=10000
 
 
 
-TP_SIZE=1
-SEQ_LENGTH=$((1024*6))
+
 # FFN_HIDDEN_SIZE=$(( $HIDDEN_SIZE * 4 ))
 
 
@@ -108,9 +108,10 @@ options=" \
   "
 OFFLOAD_ARGS=(
   --is-a-view-opti
-  --tensorboard-dir ./logs/legacy_offload_recompute_true
+  --tensorboard-dir ./logs/test
   --cpu-offload 
-  --async-offload
+  --bind-cpu
+  # --async-offload
   --no-paired-barrier
   --optimizer-selection fused_torch_adamw 
   --offload-overlap-sr

@@ -8,9 +8,8 @@ import re
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 import threading
-
+import gc
 from megatron.core import parallel_state
-from megatron.core.utils import record_wait_time
 
 
 def checksum(tensor):
@@ -89,7 +88,7 @@ def get_offload_release_thread_pool():
     if _offload_release_thread_pool is None:
         # 使用较小的线程池，因为主要是等待操作
         _offload_release_thread_pool = ThreadPoolExecutor(
-            max_workers=4, thread_name_prefix="offload_release"
+            max_workers=5, thread_name_prefix="offload_release"
         )
     return _offload_release_thread_pool
 
@@ -103,6 +102,7 @@ class PairedBarrier:
         # Only after the current exchange communication completes,
         # can we know the last event has been used by the peer device,
         # and we can safely free it.
+        return
         cls.last_event = cls.event
         from megatron.training import get_args
         if not get_args().paired_barrier:
@@ -113,6 +113,7 @@ class PairedBarrier:
 
     @classmethod
     def wait_peer(cls, peer: int = None):
+        return
         from megatron.training import get_args
         if not get_args().paired_barrier:
             return
@@ -141,18 +142,21 @@ class PairedBarrier:
 class FakeActivationStore:
     @classmethod
     def barrier(cls):
+        return
         from megatron.training import get_args
         assert not get_args().offload_overlap_sr
         cls.offload()
 
     @classmethod
     def resume(cls):
+        return
         with torch.cuda.stream(get_offload_h2d_stream()):
             PairedBarrier.wait_peer()
         return
 
     @classmethod
     def offload(cls):
+        return
         with torch.cuda.stream(get_offload_d2h_stream()):
             PairedBarrier.wait_peer()
         return
@@ -271,14 +275,56 @@ class ActivationStore(saved_tensors_hooks):
             return partial_recompute._resume_tensor((PartialRecompute.RecomputeSaveType.RECOMPUTE, (parents, function, rng_states)))
         if packed[0] == ActivationStore.SaveType.ALIAS:
             dtype, index, shape, stride, offset = packed[1]
-            with record_wait_time("Resume Event ALIAS"):
-                self._resume_event.wait()
+
+            # 第一次调用时统计wait时间
+            if self._first_resume_tensor_call:
+                self._resume_wait_start_event.record()
+
+            self._resume_event.wait()
+
+            if self._first_resume_tensor_call:
+                self._resume_wait_end_event.record()
+                self._first_resume_tensor_call = False
+
+                # 同步并计算等待时间和H2D带宽
+                self._resume_wait_end_event.synchronize()
+                wait_time_ms = self._resume_wait_start_event.elapsed_time(
+                    self._resume_wait_end_event)
+                h2d_time_ms = self._resume_start_event.elapsed_time(self._resume_end_event)
+                h2d_time_s = h2d_time_ms / 1000.0
+                bandwidth_gbps = (self._total_bytes_resumed / 1e9) / \
+                    h2d_time_s if h2d_time_s > 0 else 0
+
+                print(f"rank {torch.distributed.get_rank()} H2D带宽: {bandwidth_gbps:.2f} GB/s "
+                      f"({self._total_bytes_resumed / 1e9:.3f} GB / {h2d_time_ms:.2f} ms), "
+                      f"默认流等待H2D时间: {wait_time_ms:.2f} ms")
+
             # print(f"rank {torch.distributed.get_rank()} Resuming alias tensor id {index} {shape}, offset {offset}")
             bin, o = self.index_offset[index]
             return torch.as_strided(self._continuous_gpu_buffer[dtype][bin], shape, stride, o + offset)
         assert type == ActivationStore.SaveType.OFFLOAD
-        with record_wait_time("Resume Event OFFLOAD"):
-            self._resume_event.wait()
+
+        # 第一次调用时统计wait时间
+        if self._first_resume_tensor_call:
+            self._resume_wait_start_event.record()
+
+        self._resume_event.wait()
+
+        if self._first_resume_tensor_call:
+            self._resume_wait_end_event.record()
+            self._first_resume_tensor_call = False
+
+            # 同步并计算等待时间和H2D带宽
+            self._resume_wait_end_event.synchronize()
+            wait_time_ms = self._resume_wait_start_event.elapsed_time(self._resume_wait_end_event)
+            h2d_time_ms = self._resume_start_event.elapsed_time(self._resume_end_event)
+            h2d_time_s = h2d_time_ms / 1000.0
+            bandwidth_gbps = (self._total_bytes_resumed / 1e9) / h2d_time_s if h2d_time_s > 0 else 0
+
+            print(f"rank {torch.distributed.get_rank()} H2D带宽: {bandwidth_gbps:.2f} GB/s "
+                  f"({self._total_bytes_resumed / 1e9:.3f} GB / {h2d_time_ms:.2f} ms), "
+                  f"默认流等待H2D时间: {wait_time_ms:.2f} ms")
+
         index = info
         ret = self._gpu_store[index]
         self._gpu_store[index] = None
@@ -322,6 +368,19 @@ class ActivationStore(saved_tensors_hooks):
 
         # 线程锁，用于保护状态变更（特别是异步模式下的状态同步）
         self._state_lock = threading.Lock()
+
+        # 带宽统计相关
+        self._offload_start_event = torch.cuda.Event(enable_timing=True)
+        self._offload_end_event = torch.cuda.Event(enable_timing=True)
+        self._total_bytes_transferred = 0
+        self._resume_start_event = torch.cuda.Event(enable_timing=True)
+        self._resume_end_event = torch.cuda.Event(enable_timing=True)
+        self._total_bytes_resumed = 0
+
+        # 统计默认流等待H2D完成的时间
+        self._resume_wait_start_event = torch.cuda.Event(enable_timing=True)
+        self._resume_wait_end_event = torch.cuda.Event(enable_timing=True)
+        self._first_resume_tensor_call = True
 
         self._state = ActivationStore.State.NEW
         super().__init__(self._save_tensor, self._resume_tensor)
@@ -427,7 +486,16 @@ class ActivationStore(saved_tensors_hooks):
         """后台线程：等待offload完成事件，然后自动执行offload_release"""
         # 在后台线程中等待event完成
         self._offload_complete_event.synchronize()
-        print(f"rank {torch.distributed.get_rank()} 调用offload release")
+
+        # 计算带宽统计
+        elapsed_time_ms = self._offload_start_event.elapsed_time(self._offload_end_event)
+        elapsed_time_s = elapsed_time_ms / 1000.0
+        bandwidth_gbps = (self._total_bytes_transferred / 1e9) / \
+            elapsed_time_s if elapsed_time_s > 0 else 0
+
+        print(f"rank {torch.distributed.get_rank()} D2H带宽: {bandwidth_gbps:.2f} GB/s "
+              f"({self._total_bytes_transferred / 1e9:.3f} GB / {elapsed_time_ms:.2f} ms)")
+
         # Event完成后，在原始流的上下文中执行release
         # with torch.cuda.stream(self._d2h_stream) if self._d2h_stream else contextlib.nullcontext():
         self.offload_release()
@@ -443,11 +511,12 @@ class ActivationStore(saved_tensors_hooks):
         storages = set()
 
         with torch.cuda.stream(self._d2h_stream) if self._d2h_stream else contextlib.nullcontext():
-            with record_wait_time("Offload Event"):
-                self._save_event.wait()
+            self._save_event.wait()
 
             self._allocate_cpu_buffers()
-            PairedBarrier.wait_peer()
+            # PairedBarrier.wait_peer()
+            # 记录开始时间
+            self._offload_start_event.record()
             for index, tensor in enumerate(self._gpu_store):
                 buffer = self._index_cpu_buffer[index]
                 assert buffer.shape == tensor.shape
@@ -461,9 +530,17 @@ class ActivationStore(saved_tensors_hooks):
                     # print(f"rank {torch.distributed.get_rank()} Storage of tensor {tensor.shape} size {tensor.storage().size()/1000000} MB already in set")
                     pass
                 # print(f"Saving buffer to cpu shape {buffer.shape}, dtype {buffer.dtype}, device {buffer.device}")
-            PairedBarrier.record()
+                # 剪切操作：每copy完一个tensor就立即释放GPU缓冲区
+                self._gpu_store[index] = None
+            # PairedBarrier.record()
+
+            # 记录结束时间
+            self._offload_end_event.record()
             self._offload_complete_event.record()
         # print(f"rank {torch.distributed.get_rank()} Offloaded {size / 1000000000} Billion elements, {len(self._gpu_store)} tensors, storage size {storage_size / 1000000000} GBytes")
+
+        # 保存数据量用于带宽计算
+        self._total_bytes_transferred = storage_size
 
         self._offloaded = True
 
@@ -477,15 +554,40 @@ class ActivationStore(saved_tensors_hooks):
     def offload_release(self):
         self._change_state(ActivationStore.State.OFFLOADED, ActivationStore.State.OFFLOAD_RELEASED)
         # 使用锁确保状态读取的一致性
-        with self._state_lock:
-            current_state = self._state
-        print(f"rank {torch.distributed.get_rank()} offload_release后的state是{current_state}")
+        # with self._state_lock:
+        #     current_state = self._state
+        # print(f"rank {torch.distributed.get_rank()} offload_release后的state是{current_state}")
         assert self._offloaded
         from megatron.training import get_args
         if not get_args().async_offload and self._d2h_stream is not None:
-            with record_wait_time("Offload Complete Event"):
-                self._offload_complete_event.wait()
+            self._offload_complete_event.wait()
+
+        # 记录释放前 GPU store 的信息
+        # num_tensors = len(self._gpu_store)
+        # if num_tensors > 0 and torch.cuda.is_available():
+        #     total_size = sum(t.numel() * t.element_size() for t in self._gpu_store) / (1024**3)
+        #     print(f"rank {torch.distributed.get_rank()} [offload_release] "
+        #           f"Releasing {num_tensors} GPU tensors, total size: {total_size:.3f} GB")
+        #  # 记录执行前的显存
+
+        # # torch.cuda.synchronize()  # 确保之前的操作完成
+        # mem_before = torch.cuda.memory_allocated() / (1024**3)  # GB
+        # mem_reserved_before = torch.cuda.memory_reserved() / (1024**3)  # GB
+        # print(f"rank {torch.distributed.get_rank()} [Before offload_release] "
+        #       f"Allocated: {mem_before:.3f} GB, Reserved: {mem_reserved_before:.3f} GB")
         self._gpu_store.clear()
+        # 记录执行后的显存
+
+        # torch.cuda.synchronize()  # 确保release操作完成
+        # mem_after = torch.cuda.memory_allocated() / (1024**3)  # GB
+        # mem_reserved_after = torch.cuda.memory_reserved() / (1024**3)  # GB
+        # mem_freed = mem_before - mem_after
+        # mem_reserved_freed = mem_reserved_before - mem_reserved_after
+        # print(f"rank {torch.distributed.get_rank()} [After offload_release] "
+        #       f"Allocated: {mem_after:.3f} GB, Reserved: {mem_reserved_after:.3f} GB")
+        # print(f"rank {torch.distributed.get_rank()} [Memory Released] "
+        #       f"Freed Allocated: {mem_freed:.3f} GB, Freed Reserved: {mem_reserved_freed:.3f} GB")
+
         # 清理future引用
         self._release_future = None
 
@@ -494,19 +596,20 @@ class ActivationStore(saved_tensors_hooks):
     def prepare_resume(self):
         # 如果启用了异步release，等待后台线程完成
         if self._release_future is not None:
-            with record_wait_time("Async Offload Release Complete"):
-                print(f"rank {torch.distributed.get_rank()} 等待异步offload_release完成...")
-                self._release_future.result()  # 阻塞等待后台线程执行完offload_release
-                print(f"rank {torch.distributed.get_rank()} 异步offload_release已完成")
-        # 使用锁确保能读取到最新的状态
-        with self._state_lock:
-            current_state = self._state
-        print(f"prepare resume rank {torch.distributed.get_rank()} 现在的state是{current_state}")
+            self._release_future.result()  # 阻塞等待后台线程执行完offload_release
         self._change_state(ActivationStore.State.OFFLOAD_RELEASED,
                            ActivationStore.State.RESUME_PREPARED)
         assert self._offloaded
         self._continuous_gpu_buffer = {
             dtype: [torch.empty_like(x, device='cuda') for x in bins] for dtype, bins in self._continuous_cpu_buffer.items()}
+
+        # 计算H2D传输的数据量
+        total_bytes = 0
+        for dtype, bins in self._continuous_cpu_buffer.items():
+            for cpu_buffer in bins:
+                total_bytes += cpu_buffer.numel() * cpu_buffer.element_size()
+        self._total_bytes_resumed = total_bytes
+
         for index, (shape, layout, dtype, stride) in enumerate(self._offload_tensor_info):
             bin, offset = self.index_offset[index]
             gtensor = torch.as_strided(
@@ -520,18 +623,28 @@ class ActivationStore(saved_tensors_hooks):
     def resume(self):
         self._change_state(ActivationStore.State.RESUME_PREPARED, ActivationStore.State.RESUMED)
         assert self._offloaded
+
+        # 重置标志位，准备统计本次resume的等待时间
+        self._first_resume_tensor_call = True
+
         original_stream = torch.cuda.current_stream()
         with torch.cuda.stream(self._h2d_stream) if self._h2d_stream else contextlib.nullcontext():
-            with record_wait_time("Prepare Resume Event"):
-                self._prepare_resume_event.wait()
-            with record_wait_time("Offload Complete Event"):
-                self._offload_complete_event.wait()
-            PairedBarrier.wait_peer()
+            self._prepare_resume_event.wait()
+            self._offload_complete_event.wait()
+
+            # 记录H2D开始时间
+            self._resume_start_event.record()
+
+            # PairedBarrier.wait_peer()
             for dtype, bins in self._continuous_cpu_buffer.items():
                 for (cpu, gpu) in zip(bins, self._continuous_gpu_buffer[dtype]):
                     gpu.copy_(cpu, non_blocking=True)
-            PairedBarrier.record()
+            # PairedBarrier.record()
+
+            # 记录H2D结束时间
+            self._resume_end_event.record()
             self._resume_event.record()
+
         self._offloaded = False
 
     @torch.no_grad()
@@ -540,8 +653,7 @@ class ActivationStore(saved_tensors_hooks):
         self._change_state(ActivationStore.State.RESUME_USED, ActivationStore.State.RESUME_RELEASED)
         assert all([x is None for x in self._gpu_store])
         assert all([all([x is None for x in y]) for y in self._continuous_gpu_buffer.values()])
-        with record_wait_time("Resume Release Event"):
-            self._resume_event.wait()
+        self._resume_event.wait()
 
         self._gpu_store.clear()
         self._continuous_gpu_buffer.clear()

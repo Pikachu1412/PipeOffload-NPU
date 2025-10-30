@@ -9,7 +9,7 @@ slurm*
 local/
 .gitmodules
 # User files
-logs/
+logs*/
 kernel_meta/
 output/
 history_profile_dir/
