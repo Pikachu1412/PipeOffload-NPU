@@ -5,7 +5,7 @@
 export VSCODE_DEBUG=0
 export CONNECT_RANKS=0
 export CUDA_DEVICE_MAX_CONNECTIONS=1
-export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3
+# export ASCEND_RT_VISIBLE_DEVICES=4,5,6,7
 DIR=`pwd`
 DATETIME=`date +'date_%y-%m-%d_time_%H-%M-%S'`
 mkdir -p $DIR/logs
@@ -29,13 +29,13 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export WORLD_SIZE=1
 export RANK=0
 export MASTER_ADDR=localhost
-export MASTER_PORT=5678
+export MASTER_PORT=6479
 GPUS_PER_NODE=4
 EXIT_INTERVAL=10
 LOG_INTERVAL=10
 WORLD_SIZE_IN_GPUS=$(( $WORLD_SIZE * $GPUS_PER_NODE ))
 
-PIPELINE_SIZE=4
+PIPELINE_SIZE=$GPUS_PER_NODE
 LAYERS=$(( $PIPELINE_SIZE * 2))
 MICRO_BATCH_SIZE=1
 GLOBAL_BATCH_SIZE=$(( 8 ))
@@ -46,18 +46,7 @@ GQA=8
 TP_SIZE=1
 SEQ_LENGTH=$((4096))
 
-# profile_ranks="0"
-# for ((i = 1; i < $WORLD_SIZE_IN_GPUS; i++)); do
-#     profile_ranks="$profile_ranks $i"
-# done
-
-
 EVAL_INTERVAL=10000
-
-
-
-
-# FFN_HIDDEN_SIZE=$(( $HIDDEN_SIZE * 4 ))
 
 
 TRAIN_SAMPLES=$(( 146484375 * 1024 / $SEQ_LENGTH ))
@@ -109,16 +98,15 @@ options=" \
 OFFLOAD_ARGS=(
   --is-a-view-opti
   --tensorboard-dir ./logs/test
-  --cpu-offload 
+  # --cpu-offload 
   --bind-cpu
-  # --async-offload
   --no-paired-barrier
   --optimizer-selection fused_torch_adamw 
   --offload-overlap-sr
   # --sequence-parallel 
   --recompute-lgd
-  --use-legacy-models
-  --ckpt-format torch
+  # --use-legacy-models
+  # --ckpt-format torch
   --profile
   --profile-ranks 0 1
   --use-pytorch-profiler

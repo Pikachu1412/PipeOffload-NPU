@@ -1277,6 +1277,8 @@ def send_backward_recv_forward(input_tensor_grads, tensor_shapes, config):
 
 
 iter = 0
+
+
 def forward_backward_pipelining_without_interleaving(
     *,
     forward_step_func,
@@ -1292,7 +1294,7 @@ def forward_backward_pipelining_without_interleaving(
 ):
     """Run non-interleaved 1F1B schedule, with communication between pipeline
     stages. 
-    
+
     Returns dictionary with losses if the last stage, empty dict otherwise."""
 
     args = get_args()
@@ -1399,14 +1401,14 @@ def forward_backward_pipelining_without_interleaving(
     #       offload stream       : ...RRRSSSRRRSSS
     # Delayed rank compute stream: ......FFBBBBFFBBBB
     #       offload stream       : RRRSSSRRRSSSRRRSSS
-    
-    is_eager_stage = parallel_state.get_pipeline_model_parallel_rank() % 2 == 0
-    if not args.paired_barrier:
-        is_eager_stage = True
+
     # Run warmup forward passes.
     import psutil
     process = psutil.Process()
-    do_offload = args.cpu_offload and parallel_state.get_pipeline_model_parallel_rank() + 2 < parallel_state.get_pipeline_model_parallel_world_size()
+    do_offload = args.cpu_offload and parallel_state.get_pipeline_model_parallel_rank(
+    ) + 3 < parallel_state.get_pipeline_model_parallel_world_size()
+    # do_offload = args.rank == 0
+
     def save_input_tensor(input_tensor):
         if not do_offload:
             return
@@ -1433,15 +1435,10 @@ def forward_backward_pipelining_without_interleaving(
             checkpoint_activations_microbatch = None
 
         input_tensor = recv_forward(recv_tensor_shapes, config)
-        if do_offload and not is_eager_stage:
-            if i < num_warmup_microbatches - 1:
-                FakeActivationStore().resume()
-            else:
-                activation_store_pool.prepare_resume()
-                activation_store_pool.resume()
-            
-        save_act = activation_store_pool.get_for_offload(is_a_view_opti=args.is_a_view_opti) if do_offload else partial_recompute#contextlib.nullcontext()#
-        
+
+        save_act = activation_store_pool.get_for_offload(
+            is_a_view_opti=args.is_a_view_opti) if do_offload else partial_recompute  # contextlib.nullcontext()#
+
         # print(f"rank {rank} mb {i} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         with save_act:
             # parallel_state.set_seq_split_idx(i % get_args().num_seq_splits)
@@ -1462,14 +1459,12 @@ def forward_backward_pipelining_without_interleaving(
         send_forward(output_tensor, send_tensor_shapes, config)
         if do_offload:
             save_input_tensor(input_tensor)
-            
-            activation_store_pool.offload(auto_release=args.async_offload)
-            if not args.async_offload:            
+            if i == 0:
+                activation_store_pool.offload()
+            if i > 0:
                 activation_store_pool.offload_release()
-            # if is_eager_stage:
-            #     if i < num_warmup_microbatches - 1:
-            #         FakeActivationStore().resume()
-            
+                activation_store_pool.offload()
+
         total_num_tokens += num_tokens.item()
 
         if not forward_only:
@@ -1482,12 +1477,6 @@ def forward_backward_pipelining_without_interleaving(
     # receive this tensor here.
     if num_microbatches_remaining > 0:
         input_tensor = recv_forward(recv_tensor_shapes, config)
-    # if do_offload:
-    #     # print(f"P0) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
-    #     # print(f"P1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
-    #     if is_eager_stage:
-    #         activation_store_pool.prepare_resume()
-        # print(f"P2) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
 
     # Run 1F1B in steady state.
     for i in range(num_microbatches_remaining):
@@ -1502,21 +1491,14 @@ def forward_backward_pipelining_without_interleaving(
             checkpoint_activations_microbatch = None
         # print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         if do_offload:
-        # #     if is_eager_stage:
-        # #         activation_store_pool.resume()
-        # #     else:
-            activation_store_pool.prepare_resume()
-            activation_store_pool.resume()
-            # print(f"R1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
-            # if last_resume_act is not None:
-            #     activation_store_pool.release(last_resume_act)
-            # last_resume_act = resume_act
             save_act = activation_store_pool.get_for_offload(is_a_view_opti=args.is_a_view_opti)
         else:
-            save_act = partial_recompute#contextlib.nullcontext()#
+            save_act = partial_recompute  # contextlib.nullcontext()#
         # print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB")
-
-        with save_act:        
+        if do_offload and i == 0:
+            activation_store_pool.prepare_resume()
+            activation_store_pool.resume()
+        with save_act:
             output_tensor, num_tokens = forward_step(
                 forward_step_func,
                 data_iterator,
@@ -1537,16 +1519,8 @@ def forward_backward_pipelining_without_interleaving(
         # print(f"F1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         if do_offload:
             save_input_tensor(input_tensor)
-            # if is_eager_stage:
-            #     activation_store_pool.prepare_resume()
-            # else:
-        #     if is_eager_stage:
-        #         activation_store_pool.resume()
-        #     else:
-            activation_store_pool.offload(auto_release=args.async_offload)
-            # activation_store_pool.prepare_resume()
-            # activation_store_pool.resume()
-            
+            activation_store_pool.offload()
+
         # print(f"S1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         total_num_tokens += num_tokens.item()
 
@@ -1560,9 +1534,6 @@ def forward_backward_pipelining_without_interleaving(
             output_tensor_grad = send_forward_recv_backward(
                 output_tensor, send_tensor_shapes, config
             )
-            # For even stages, do offload after communication to avoid deadlock on CPU.
-            # if do_offload and is_eager_stage:
-            #     activation_store_pool.offload(auto_release=args.async_offload)
 
             # Add input_tensor and output_tensor to end of list.
             input_tensors.append(input_tensor)
@@ -1579,10 +1550,15 @@ def forward_backward_pipelining_without_interleaving(
             if num_warmup_microbatches == 0 and last_iteration:
                 if config.grad_sync_func is None or rank == 0:
                     enable_grad_sync()
+            if do_offload:
+                activation_store_pool.offload_release()
             # Selectively enabling bw-split will change the order of W,
             # making it not exactly match the origin numeric results.
             # So disable it when enable_exactly_numeric_match is true.
             resume_input_tensor(input_tensor)
+            if do_offload:
+                activation_store_pool.prepare_resume()
+                activation_store_pool.resume()
 
             input_tensor_grad = backward_step(
                 input_tensor, output_tensor, output_tensor_grad, model_type, config
@@ -1590,8 +1566,6 @@ def forward_backward_pipelining_without_interleaving(
             # print(f"B1) rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
             if do_offload:
                 activation_store_pool.resume_release()
-                if not args.async_offload:
-                    activation_store_pool.offload_release()
             if last_iteration:
                 input_tensor = None
                 send_backward(input_tensor_grad, recv_tensor_shapes, config)
@@ -1599,8 +1573,7 @@ def forward_backward_pipelining_without_interleaving(
                 input_tensor = send_backward_recv_forward(
                     input_tensor_grad, recv_tensor_shapes, config
                 )
-    if do_offload:
-        activation_store_pool.prepare_resume()
+
     # Run cooldown backward passes.
     if not forward_only:
         for i in range(num_warmup_microbatches):
@@ -1617,34 +1590,25 @@ def forward_backward_pipelining_without_interleaving(
             input_tensor = input_tensors.pop(0)
             output_tensor = output_tensors.pop(0)
             if do_offload:
-                if is_eager_stage:
+                # offload release往后挪，倒数第三个rank会报错
+                # if i == 0:
+                #     activation_store_pool.offload_release()
+                if not last_iteration:
+                    activation_store_pool.prepare_resume()
                     activation_store_pool.resume()
-                    # if i < num_warmup_microbatches - 2:
-                    #     FakeActivationStore().offload()
-                    # if not last_iteration:
-                    #     activation_store_pool.prepare_resume()
-                    
-                else:
-                    if not last_iteration:
-                        activation_store_pool.prepare_resume()
-                        activation_store_pool.resume()
-                    FakeActivationStore().offload()
+
             output_tensor_grad = recv_backward(send_tensor_shapes, config)
             resume_input_tensor(input_tensor)
+            if do_offload:
+                if i == 0:
+                    activation_store_pool.offload_release()
             input_tensor_grad = backward_step(
                 input_tensor, output_tensor, output_tensor_grad, model_type, config
             )
+
             if do_offload:
-                if not last_iteration:
-                    activation_store_pool.prepare_resume()
                 activation_store_pool.resume_release()
-            # if get_args().cpu_offload and not parallel_state.is_pipeline_last_stage():
-            #     activation_store_pool.release(resume_act)
             send_backward(input_tensor_grad, recv_tensor_shapes, config)
-        # if do_offload:
-        #     if last_resume_act is not None:
-        #         activation_store_pool.release(last_resume_act)
-        #     last_resume_act = None
 
         # Launch any remaining grad reductions.
         if no_sync_context is not None:

@@ -205,16 +205,17 @@ class ActivationStore(saved_tensors_hooks):
         assert not self._offloaded
         # print(f"this tensor contiguous is {tensor.is_contiguous()}, the shape is {tensor.shape}")
         # print(f"Received tensor type: {type(tensor)}, is Parameter: {isinstance(tensor, torch.nn.parameter.Parameter)}")
-        if not tensor.is_contiguous():
-            # print(f"type is {type(tensor)}")
-            tensor = tensor.contiguous()
+        # if not tensor.is_contiguous():
+        #     # print(f"type is {type(tensor)}")
+        #     tensor = tensor.contiguous()
         self._change_state({ActivationStore.State.NEW, ActivationStore.State.SAVING},
                            ActivationStore.State.SAVING)
         if isinstance(tensor, torch.nn.parameter.Parameter):
             return ActivationStore.SaveType.PASS_THROUGH, tensor
         if tensor.numel() <= 1024:
             return ActivationStore.SaveType.PASS_THROUGH, tensor
-
+        if not tensor.is_contiguous():
+            return ActivationStore.SaveType.PASS_THROUGH, tensor
         recompute = partial_recompute._save_tensor(tensor)
         if recompute[0] == PartialRecompute.RecomputeSaveType.RECOMPUTE:
             (parents, function, rng_states) = recompute[1]
@@ -297,7 +298,7 @@ class ActivationStore(saved_tensors_hooks):
 
                 print(f"rank {torch.distributed.get_rank()} H2D带宽: {bandwidth_gbps:.2f} GB/s "
                       f"({self._total_bytes_resumed / 1e9:.3f} GB / {h2d_time_ms:.2f} ms), "
-                      f"默认流等待H2D时间: {wait_time_ms:.2f} ms")
+                      f"alias 默认流等待H2D时间: {wait_time_ms:.2f} ms")
 
             # print(f"rank {torch.distributed.get_rank()} Resuming alias tensor id {index} {shape}, offset {offset}")
             bin, o = self.index_offset[index]
@@ -323,7 +324,7 @@ class ActivationStore(saved_tensors_hooks):
 
             print(f"rank {torch.distributed.get_rank()} H2D带宽: {bandwidth_gbps:.2f} GB/s "
                   f"({self._total_bytes_resumed / 1e9:.3f} GB / {h2d_time_ms:.2f} ms), "
-                  f"默认流等待H2D时间: {wait_time_ms:.2f} ms")
+                  f"offload 默认流等待H2D时间: {wait_time_ms:.2f} ms")
 
         index = info
         ret = self._gpu_store[index]
@@ -363,15 +364,14 @@ class ActivationStore(saved_tensors_hooks):
         # key: storage_data_ptr, value: list of (index, storage_offset, numel)
         self._storage_index_map = {}
 
-        # 用于追踪异步release的Future对象
-        self._release_future = None
-
         # 线程锁，用于保护状态变更（特别是异步模式下的状态同步）
         self._state_lock = threading.Lock()
 
         # 带宽统计相关
         self._offload_start_event = torch.cuda.Event(enable_timing=True)
         self._offload_end_event = torch.cuda.Event(enable_timing=True)
+        self._offload_wait_start_event = torch.cuda.Event(enable_timing=True)
+        self._offload_wait_end_event = torch.cuda.Event(enable_timing=True)
         self._total_bytes_transferred = 0
         self._resume_start_event = torch.cuda.Event(enable_timing=True)
         self._resume_end_event = torch.cuda.Event(enable_timing=True)
@@ -381,6 +381,7 @@ class ActivationStore(saved_tensors_hooks):
         self._resume_wait_start_event = torch.cuda.Event(enable_timing=True)
         self._resume_wait_end_event = torch.cuda.Event(enable_timing=True)
         self._first_resume_tensor_call = True
+        self._first_offload_release_call = True
 
         self._state = ActivationStore.State.NEW
         super().__init__(self._save_tensor, self._resume_tensor)
@@ -474,7 +475,7 @@ class ActivationStore(saved_tensors_hooks):
             allocated_size = sum([x.numel() for x in self._continuous_cpu_buffer[dtype]])
             aligned_size = sum([nearest_power_of_2(x.numel())
                                for x in self._continuous_cpu_buffer[dtype]])
-            print(f"rank {torch.distributed.get_rank()} Allocated {allocated_size / 1000000} M elements for {len(tensors)} tensors of type {dtype} total length {total_size} aligned size {aligned_size}")
+            # print(f"rank {torch.distributed.get_rank()} Allocated {allocated_size / 1000000} M elements for {len(tensors)} tensors of type {dtype} total length {total_size} aligned size {aligned_size}")
 
         for index, (shape, layout, dtype, stride) in enumerate(self._offload_tensor_info):
             bin, offset = self.index_offset[index]
@@ -482,30 +483,13 @@ class ActivationStore(saved_tensors_hooks):
                 self._continuous_cpu_buffer[dtype][bin], shape, stride, offset)
             self._index_cpu_buffer.append(ctensor)
 
-    def _async_wait_and_release(self):
-        """后台线程：等待offload完成事件，然后自动执行offload_release"""
-        # 在后台线程中等待event完成
-        self._offload_complete_event.synchronize()
-
-        # 计算带宽统计
-        elapsed_time_ms = self._offload_start_event.elapsed_time(self._offload_end_event)
-        elapsed_time_s = elapsed_time_ms / 1000.0
-        bandwidth_gbps = (self._total_bytes_transferred / 1e9) / \
-            elapsed_time_s if elapsed_time_s > 0 else 0
-
-        print(f"rank {torch.distributed.get_rank()} D2H带宽: {bandwidth_gbps:.2f} GB/s "
-              f"({self._total_bytes_transferred / 1e9:.3f} GB / {elapsed_time_ms:.2f} ms)")
-
-        # Event完成后，在原始流的上下文中执行release
-        # with torch.cuda.stream(self._d2h_stream) if self._d2h_stream else contextlib.nullcontext():
-        self.offload_release()
-
     @torch.no_grad()
     # @torch.cuda.nvtx.range("Offload")
     def offload(self, auto_release=False):
         self._change_state(ActivationStore.State.SAVING, ActivationStore.State.OFFLOADED)
         assert not self._offloaded
 
+        self._first_offload_release_call = True
         size = 0
         storage_size = 0
         storages = set()
@@ -531,7 +515,10 @@ class ActivationStore(saved_tensors_hooks):
                     pass
                 # print(f"Saving buffer to cpu shape {buffer.shape}, dtype {buffer.dtype}, device {buffer.device}")
                 # 剪切操作：每copy完一个tensor就立即释放GPU缓冲区
-                self._gpu_store[index] = None
+                # has_nan = torch.any(torch.isnan(tensor))
+                # if has_nan:
+                #     print("卸载后张量中包含 NaN")
+                # self._gpu_store[index] = None
             # PairedBarrier.record()
 
             # 记录结束时间
@@ -544,23 +531,31 @@ class ActivationStore(saved_tensors_hooks):
 
         self._offloaded = True
 
-        # 如果启用自动释放，提交任务到线程池
-        if auto_release:
-            thread_pool = get_offload_release_thread_pool()
-            self._release_future = thread_pool.submit(self._async_wait_and_release)
-
     @torch.no_grad()
     # @torch.cuda.nvtx.range("OffloadRelease")
     def offload_release(self):
         self._change_state(ActivationStore.State.OFFLOADED, ActivationStore.State.OFFLOAD_RELEASED)
-        # 使用锁确保状态读取的一致性
-        # with self._state_lock:
-        #     current_state = self._state
-        # print(f"rank {torch.distributed.get_rank()} offload_release后的state是{current_state}")
         assert self._offloaded
-        from megatron.training import get_args
-        if not get_args().async_offload and self._d2h_stream is not None:
+        if self._d2h_stream is not None:
+            if self._first_offload_release_call:
+                self._offload_wait_start_event.record()
             self._offload_complete_event.wait()
+            if self._first_offload_release_call:
+                self._offload_wait_end_event.record()
+                self._offload_wait_end_event.synchronize()
+                wait_time_ms = self._offload_wait_start_event.elapsed_time(
+                    self._offload_wait_end_event)
+                self._offload_end_event.synchronize()
+                d2h_time_ms = self._offload_start_event.elapsed_time(self._offload_end_event)
+                d2h_time_s = d2h_time_ms / 1000.0
+                bandwidth_gbps = (self._total_bytes_transferred / 1e9) / \
+                    d2h_time_s if d2h_time_s > 0 else 0
+                print(
+                    f"rank {torch.distributed.get_rank()} D2H带宽: {bandwidth_gbps:.2f} GB/s "
+                    f"({self._total_bytes_transferred / 1e9:.3f} GB / {d2h_time_ms:.2f} ms), "
+                    f"默认流等待D2H时间: {wait_time_ms:.2f} ms"
+                )
+                self._first_offload_release_call = False
 
         # 记录释放前 GPU store 的信息
         # num_tensors = len(self._gpu_store)
@@ -588,15 +583,9 @@ class ActivationStore(saved_tensors_hooks):
         # print(f"rank {torch.distributed.get_rank()} [Memory Released] "
         #       f"Freed Allocated: {mem_freed:.3f} GB, Freed Reserved: {mem_reserved_freed:.3f} GB")
 
-        # 清理future引用
-        self._release_future = None
-
     @torch.no_grad()
     # @torch.cuda.nvtx.range("PrepareResume")
     def prepare_resume(self):
-        # 如果启用了异步release，等待后台线程完成
-        if self._release_future is not None:
-            self._release_future.result()  # 阻塞等待后台线程执行完offload_release
         self._change_state(ActivationStore.State.OFFLOAD_RELEASED,
                            ActivationStore.State.RESUME_PREPARED)
         assert self._offloaded
@@ -644,6 +633,11 @@ class ActivationStore(saved_tensors_hooks):
             # 记录H2D结束时间
             self._resume_end_event.record()
             self._resume_event.record()
+            # for dtype, bins in self._continuous_cpu_buffer.items():
+            #     for (cpu, gpu) in zip(bins, self._continuous_gpu_buffer[dtype]):
+            #         has_nan = torch.any(torch.isnan(gpu))
+            #         if has_nan:
+            #             print("resume后张量中包含 NaN")
 
         self._offloaded = False
 
@@ -661,13 +655,6 @@ class ActivationStore(saved_tensors_hooks):
 
     def reset_state(self):
         self._change_state(ActivationStore.State.RESUME_RELEASED, ActivationStore.State.NEW)
-        # 确保之前的异步release已完成
-        if self._release_future is not None:
-            try:
-                self._release_future.result(timeout=0.1)
-            except:
-                pass
-            self._release_future = None
 
 
 offload_stream = None
@@ -719,9 +706,6 @@ class ActivationStorePool:
         assert self._stage_queues[stage_idx], f"stage_idx {stage_idx} is empty"
         store = self._stage_queues[stage_idx].pop(0)
         ret = func(store)
-        from megatron.training import get_args
-        if get_args().async_offload and stage_idx == 0:
-            stage_idx = 1
         self._stage_queues[stage_idx + 1].append(store)
         return ret
 

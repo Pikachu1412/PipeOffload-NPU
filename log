@@ -1,8 +1,8 @@
-torchrun --nnodes 1 --node_rank 0 --master_addr localhost --master_port 5678 --nproc_per_node=4 /data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py --tensor-model-parallel-size 1 --pipeline-model-parallel-size 4 --num-layers 8 --hidden-size 4096 --ffn-hidden-size 16384 --num-attention-heads 32 --group-query-attention --num-query-groups 8 --exit-interval 10 --seq-length 4096 --max-position-embeddings 4096 --micro-batch-size 1 --global-batch-size 8 --train-samples 36621093 --lr-decay-samples 31738281 --lr-warmup-samples 183105 --lr 6.0e-5 --min-lr 6.0e-6 --lr-decay-style cosine --log-interval 10 --eval-iters 40 --eval-interval 10000 --data-path /tmp/zb_sample_dataset/dataset/c4_text_document --tokenizer-type GPTSentencePieceTokenizer --tokenizer-model /tmp/zb_sample_dataset/tokenizers/tokenizer.model --split 98,2,0 --clip-grad 8.0 --weight-decay 0.1 --adam-beta1 0.9 --adam-beta2 0.95 --init-method-std 0.006 --no-barrier-with-level-1-timing --transformer-impl local --no-bias-dropout-fusion --no-create-attention-mask-in-dataloader --untie-embeddings-and-output-weights --initial-loss-scale 65536 --measure-activation-memory --use-tp-pp-dp-mapping --offload-continuous-buffers --bf16 --use-distributed-optimizer --is-a-view-opti --tensorboard-dir ./logs/test --cpu-offload --bind-cpu --no-paired-barrier --optimizer-selection fused_torch_adamw --offload-overlap-sr --recompute-lgd --use-legacy-models --ckpt-format torch --profile --profile-ranks 0 1 --use-pytorch-profiler --profile-step-start 3 --profile-step-end 5
-W1030 15:38:14.902322 3751683 site-packages/torch/distributed/run.py:792] 
-W1030 15:38:14.902322 3751683 site-packages/torch/distributed/run.py:792] *****************************************
-W1030 15:38:14.902322 3751683 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
-W1030 15:38:14.902322 3751683 site-packages/torch/distributed/run.py:792] *****************************************
+torchrun --nnodes 1 --node_rank 0 --master_addr localhost --master_port 6479 --nproc_per_node=4 /data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py --tensor-model-parallel-size 1 --pipeline-model-parallel-size 4 --num-layers 8 --hidden-size 4096 --ffn-hidden-size 16384 --num-attention-heads 32 --group-query-attention --num-query-groups 8 --exit-interval 10 --seq-length 4096 --max-position-embeddings 4096 --micro-batch-size 1 --global-batch-size 8 --train-samples 36621093 --lr-decay-samples 31738281 --lr-warmup-samples 183105 --lr 6.0e-5 --min-lr 6.0e-6 --lr-decay-style cosine --log-interval 10 --eval-iters 40 --eval-interval 10000 --data-path /tmp/zb_sample_dataset/dataset/c4_text_document --tokenizer-type GPTSentencePieceTokenizer --tokenizer-model /tmp/zb_sample_dataset/tokenizers/tokenizer.model --split 98,2,0 --clip-grad 8.0 --weight-decay 0.1 --adam-beta1 0.9 --adam-beta2 0.95 --init-method-std 0.006 --no-barrier-with-level-1-timing --transformer-impl local --no-bias-dropout-fusion --no-create-attention-mask-in-dataloader --untie-embeddings-and-output-weights --initial-loss-scale 65536 --measure-activation-memory --use-tp-pp-dp-mapping --offload-continuous-buffers --bf16 --use-distributed-optimizer --is-a-view-opti --tensorboard-dir ./logs/test --bind-cpu --no-paired-barrier --optimizer-selection fused_torch_adamw --offload-overlap-sr --recompute-lgd --profile --profile-ranks 0 1 --use-pytorch-profiler --profile-step-start 3 --profile-step-end 5
+W1113 15:51:28.391953 2872656 site-packages/torch/distributed/run.py:792] 
+W1113 15:51:28.391953 2872656 site-packages/torch/distributed/run.py:792] *****************************************
+W1113 15:51:28.391953 2872656 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1113 15:51:28.391953 2872656 site-packages/torch/distributed/run.py:792] *****************************************
 /data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch_npu/contrib/transfer_to_npu.py:298: ImportWarning: 
     *************************************************************************************************************
     The torch.Tensor.cuda and torch.nn.Module.cuda are replaced with torch.Tensor.npu and torch.nn.Module.npu now..
@@ -16,14 +16,6 @@ W1030 15:38:14.902322 3751683 site-packages/torch/distributed/run.py:792] ******
   warnings.warn(msg, ImportWarning)
 /data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch_npu/contrib/transfer_to_npu.py:255: RuntimeWarning: torch.jit.script and torch.jit.script_method will be disabled by transfer_to_npu, which currently does not support them, if you need to enable them, please do not use transfer_to_npu.
   warnings.warn(msg, RuntimeWarning)
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
@@ -46,6 +38,10 @@ Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
     module is deprecated and will be removed in 0.10.0. Please use 
     'megatron.core.extensions.transformer_engine' instead.
   from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
 > setting tensorboard ...
 WARNING: one_logger package is required to enable e2e metrics tracking. please go to https://confluence.nvidia.com/display/MLWFO/Package+Repositories for details to install it
 using world size: 4, data-parallel size: 1, context-parallel size: 1, tensor-model-parallel size: 1, encoder-tensor-model-parallel size: 0, pipeline-model-parallel size: 4, encoder-pipeline-model-parallel size: 0
@@ -86,7 +82,6 @@ using torch.bfloat16 for parameters ...
   apply_query_key_layer_scaling ................... False
   apply_residual_connection_post_layernorm ........ False
   apply_rope_fusion ............................... True
-  async_offload ................................... False
   async_save ...................................... None
   async_tensor_model_parallel_allreduce ........... True
   attention_dropout ............................... 0.1
@@ -120,7 +115,7 @@ using torch.bfloat16 for parameters ...
   ckpt_convert_format ............................. None
   ckpt_convert_save ............................... None
   ckpt_convert_update_legacy_dist_opt_format ...... False
-  ckpt_format ..................................... torch
+  ckpt_format ..................................... torch_dist
   ckpt_fully_parallel_load ........................ False
   ckpt_fully_parallel_save ........................ True
   ckpt_fully_parallel_save_deprecated ............. False
@@ -139,7 +134,7 @@ using torch.bfloat16 for parameters ...
   context_parallel_kv_cache_policy ................ None
   context_parallel_size ........................... 1
   cp_window_size .................................. 1
-  cpu_offload ..................................... True
+  cpu_offload ..................................... False
   create_attention_mask_in_dataloader ............. False
   cross_entropy_loss_fusion ....................... False
   data_cache_path ................................. None
@@ -526,7 +521,7 @@ using torch.bfloat16 for parameters ...
   use_checkpoint_opt_param_scheduler .............. False
   use_cp_send_recv_overlap ........................ False
   use_cpu_initialization .......................... None
-  use_dist_ckpt ................................... False
+  use_dist_ckpt ................................... True
   use_dist_ckpt_deprecated ........................ False
   use_distributed_optimizer ....................... True
   use_ema ......................................... False
@@ -537,7 +532,7 @@ using torch.bfloat16 for parameters ...
   use_fused_rotary_pos_emb ........................ False
   use_fused_swiglu ................................ False
   use_fusion_attn_v2 .............................. False
-  use_legacy_models ............................... True
+  use_legacy_models ............................... False
   use_multiparameter_pipeline_model_parallel ...... False
   use_nanopipe .................................... False
   use_nanopipe_swap ............................... False
@@ -571,23 +566,27 @@ using torch.bfloat16 for parameters ...
 -------------------- end of arguments ---------------------
 INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to constant 8
 > building GPTSentencePieceTokenizer tokenizer ...
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
  > padded vocab (size: 32000) with 0 dummy tokens (new size: 32000)
 > initializing torch distributed ...
-[W1030 15:38:35.121389599 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.122630954 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.136615817 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.146855296 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.147671540 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.148297892 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.148951304 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.149754868 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.150301550 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.150818142 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.151415604 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.152223737 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.153035050 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.153821303 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1030 15:38:35.155388299 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+[W1113 15:51:50.818705191 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.820502118 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.834936963 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.891941752 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.892841196 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.893497508 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.894170391 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.895003454 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.895583486 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.896179509 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.896815321 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.897648924 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.898500218 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.899371281 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1113 15:51:50.901105548 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
 > initialized tensor model parallel with size 1
 > initialized pipeline model parallel with size 4
 > setting random seeds to 1234 ...
@@ -595,66 +594,66 @@ INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to
 make: Entering directory '/data0/ssy/Megatron-LM-0.9.0/megatron/core/datasets'
 make: Nothing to be done for 'default'.
 make: Leaving directory '/data0/ssy/Megatron-LM-0.9.0/megatron/core/datasets'
->>> done with dataset index builder. Compilation time: 0.056 seconds
-[rank0]:[W1030 15:38:36.538704275 compiler_depend.ts:65] Warning: Warning: The torch.npu.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='npu') to create tensors. (function operator())
-time to initialize megatron (seconds): -1.092
-[after megatron is initialized] datetime: 2025-10-30 15:38:38 
+>>> done with dataset index builder. Compilation time: 0.058 seconds
+[rank0]:[W1113 15:51:50.294416859 compiler_depend.ts:65] Warning: Warning: The torch.npu.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='npu') to create tensors. (function operator())
+time to initialize megatron (seconds): 25.854
+[after megatron is initialized] datetime: 2025-11-13 15:51:53 
 building GPT model ...
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 2): 352415744 > number of parameters on (tensor, pipeline) model parallel rank (0, 1): 352415744
+
  > number of parameters on (tensor, pipeline) model parallel rank (0, 3): 483495936
- > number of parameters on (tensor, pipeline) model parallel rank (0, 2): 352415744
- > number of parameters on (tensor, pipeline) model parallel rank (0, 1): 352415744
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
 Params for bucket 1 (352415744 elements):
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.1.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.1.input_norm.bias
-	module.language_model.encoder.layers.0.input_norm.bias
-	module.language_model.encoder.layers.1.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.0.post_attention_norm.weight
-	module.language_model.encoder.layers.0.self_attention.dense.weight
-	module.language_model.encoder.layers.1.post_attention_norm.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.0.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.1.input_norm.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.0.post_attention_norm.bias
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.0.self_attention.dense.bias
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.1.post_attention_norm.bias
-	module.language_model.encoder.layers.1.self_attention.dense.bias
-	module.language_model.encoder.layers.0.input_norm.weight
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.1.self_attention.dense.weight
-	module.language_model.encoder.layers.0.self_attention.query_key_value.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.1.input_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_qkv.weight
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
 Params for bucket 1 (352415744 elements):
-	module.language_model.encoder.layers.0.post_attention_norm.weight
-	module.language_model.encoder.layers.0.self_attention.dense.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.0.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.0.input_norm.weight
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.1.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.1.input_norm.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.0.post_attention_norm.bias
-	module.language_model.encoder.layers.1.post_attention_norm.weight
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.0.self_attention.dense.bias
-	module.language_model.encoder.layers.1.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.1.self_attention.dense.weight
-	module.language_model.encoder.layers.0.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.1.post_attention_norm.bias
-	module.language_model.encoder.layers.1.self_attention.dense.bias
-	module.language_model.encoder.layers.1.input_norm.bias
-	module.language_model.encoder.layers.0.input_norm.bias
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.input_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
@@ -663,33 +662,33 @@ Params for bucket 1 (352415744 elements):
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
 Params for bucket 1 (483495936 elements):
-	module.language_model.encoder.layers.1.post_attention_norm.weight
-	module.language_model.encoder.layers.0.self_attention.dense.weight
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.1.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.final_norm.bias
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.0.self_attention.query_key_value.weight
-	module.language_model.output_layer.weight
-	module.language_model.encoder.final_norm.weight
-	module.language_model.encoder.layers.1.self_attention.dense.weight
-	module.language_model.encoder.layers.0.post_attention_norm.bias
-	module.language_model.encoder.layers.0.post_attention_norm.weight
-	module.language_model.encoder.layers.1.self_attention.dense.bias
-	module.language_model.encoder.layers.1.input_norm.bias
-	module.language_model.encoder.layers.1.input_norm.weight
-	module.language_model.encoder.layers.1.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.0.input_norm.weight
-	module.language_model.encoder.layers.1.post_attention_norm.bias
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.0.self_attention.dense.bias
-	module.language_model.encoder.layers.0.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.0.input_norm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.decoder.final_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.final_layernorm.weight
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.output_layer.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
@@ -697,118 +696,182 @@ Params for bucket 1 (483495936 elements):
 INFO:megatron.core.distributed.distributed_data_parallel:Setting up DistributedDataParallel with config DistributedDataParallelConfig(grad_reduce_in_fp32=True, overlap_grad_reduce=False, overlap_param_gather=False, align_param_gather=False, use_distributed_optimizer=True, check_for_nan_in_grad=True, bucket_size=None, average_in_collective=False, fp8_param_gather=False)
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
 Params for bucket 1 (500264960 elements):
-	module.language_model.encoder.layers.1.self_attention.dense.bias
-	module.language_model.encoder.layers.1.input_norm.bias
-	module.language_model.encoder.layers.1.self_attention.dense.weight
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.0.self_attention.dense.bias
-	module.language_model.encoder.layers.0.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.1.post_attention_norm.bias
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.0.post_attention_norm.weight
-	module.language_model.encoder.layers.0.self_attention.dense.weight
-	module.language_model.encoder.layers.0.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.1.input_norm.weight
-	module.language_model.encoder.layers.0.mlp.dense_4h_to_h.bias
-	module.language_model.embedding.word_embeddings.weight
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.bias
-	module.language_model.encoder.layers.0.mlp.dense_h_to_4h.bias
-	module.language_model.encoder.layers.1.mlp.dense_4h_to_h.weight
-	module.language_model.encoder.layers.0.input_norm.weight
-	module.language_model.encoder.layers.1.post_attention_norm.weight
-	module.language_model.encoder.layers.1.self_attention.query_key_value.bias
-	module.language_model.encoder.layers.1.self_attention.query_key_value.weight
-	module.language_model.encoder.layers.0.post_attention_norm.bias
-	module.language_model.embedding.position_embeddings.weight
-	module.language_model.encoder.layers.1.mlp.dense_h_to_4h.weight
-	module.language_model.encoder.layers.0.input_norm.bias
-INFO:megatron.core.optimizer:Setting up optimizer with config OptimizerConfig(optimizer='adam', lr=6e-05, min_lr=6e-06, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, fp16=False, bf16=True, params_dtype=torch.bfloat16, loss_scale=None, initial_loss_scale=65536.0, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.95, adam_eps=1e-08, sgd_momentum=0.9, use_distributed_optimizer=True, overlap_grad_reduce=False, overlap_param_gather=False, overlap_param_gather_with_optimizer_step=False, clip_grad=8.0, log_num_zeros_in_grad=False, barrier_with_L1_time=False, timers=<megatron.core.timers.Timers object at 0xffff4ec51f00>, config_logger_dir='')
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.1.input_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.embedding.word_embeddings.weight
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.embedding.position_embeddings.weight
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.mlp.linear_fc1.weight
+INFO:megatron.core.optimizer:Setting up optimizer with config OptimizerConfig(optimizer='adam', lr=6e-05, min_lr=6e-06, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, fp16=False, bf16=True, params_dtype=torch.bfloat16, loss_scale=None, initial_loss_scale=65536.0, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.95, adam_eps=1e-08, sgd_momentum=0.9, use_distributed_optimizer=True, overlap_grad_reduce=False, overlap_param_gather=False, overlap_param_gather_with_optimizer_step=False, clip_grad=8.0, log_num_zeros_in_grad=False, barrier_with_L1_time=False, timers=<megatron.core.timers.Timers object at 0xfffef8f6da20>, config_logger_dir='')
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
 setting training iterations to 4577636
 INFO:megatron.core.optimizer_param_scheduler:> learning rate decay style: cosine
-[after model, optimizer, and learning rate scheduler are built] datetime: 2025-10-30 15:38:40 
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754564 is still running
+[after model, optimizer, and learning rate scheduler are built] datetime: 2025-11-13 15:51:54 
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874290 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754562 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874292 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754563 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874291 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754565 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874293 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754642 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874370 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
+  _cleanup()
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874392 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=105 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754656 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874414 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754686 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874421 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
-  _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754691 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874458 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754730 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874470 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754751 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874504 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754774 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874515 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754786 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874756 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754820 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874767 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754842 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874800 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754863 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874811 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754876 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874844 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754908 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2874856 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754909 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875034 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754910 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875070 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754911 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875333 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754912 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875345 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754916 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875378 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754917 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875388 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754918 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875422 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754919 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875436 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754920 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875466 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754924 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875478 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754926 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875510 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754929 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875531 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754930 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875555 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754931 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875567 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754932 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875599 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754933 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875600 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754934 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875602 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754935 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875605 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 3754936 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875606 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875607 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875608 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875609 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875610 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875611 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875612 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875613 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875614 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875615 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875616 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875617 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875618 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875619 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875623 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875627 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875628 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875629 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875630 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875631 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875632 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875634 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875633 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875635 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875636 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875637 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875638 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875639 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875640 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875641 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875642 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2875643 is still running
   _warn("subprocess %s is still running" % self.pid,
 Bind cpu successful!!!
 > building train, validation, and test datasets ...
@@ -818,7 +881,7 @@ Bind cpu successful!!!
     test:       320
 INFO:megatron.core.datasets.blended_megatron_dataset_config:Let split_matrix = [(0, 0.98), (0.98, 1.0), None]
 > building train, validation, and test datasets for GPT ...
-INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building dataset splits with cls=GPTDataset, sizes=(36621093, 146560, 320), and config=GPTDatasetConfig(random_seed=1234, sequence_length=4096, blend=(['/tmp/zb_sample_dataset/dataset/c4_text_document'], None), blend_per_split=[None, None, None], renormalize_blend_weights=False, split='98,2,0', split_matrix=[(0, 0.98), (0.98, 1.0), None], num_dataset_builder_threads=1, path_to_cache=None, mmap_bin_files=True, mock=False, tokenizer=<megatron.training.tokenizer.tokenizer._GPTSentencePieceTokenizer object at 0xffff4ec055a0>, reset_position_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=False, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, s3_cache_path=None)
+INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building dataset splits with cls=GPTDataset, sizes=(36621093, 146560, 320), and config=GPTDatasetConfig(random_seed=1234, sequence_length=4096, blend=(['/tmp/zb_sample_dataset/dataset/c4_text_document'], None), blend_per_split=[None, None, None], renormalize_blend_weights=False, split='98,2,0', split_matrix=[(0, 0.98), (0.98, 1.0), None], num_dataset_builder_threads=1, path_to_cache=None, mmap_bin_files=True, mock=False, tokenizer=<megatron.training.tokenizer.tokenizer._GPTSentencePieceTokenizer object at 0xfffef8f6e590>, reset_position_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=False, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, s3_cache_path=None)
 INFO:megatron.core.datasets.indexed_dataset:Load the _IndexReader from /tmp/zb_sample_dataset/dataset/c4_text_document.idx
 INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence lengths
 INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence pointers
@@ -836,125 +899,56 @@ INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 375560d5be3a
 INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 375560d5be3ad664e8b59560350768bb-GPTDataset-valid-shuffle_index.npy
 INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 147111
 > finished creating GPT datasets ...
-[after dataloaders are built] datetime: 2025-10-30 15:38:43 
+[after dataloaders are built] datetime: 2025-11-13 15:52:00 
 done with setup ...
 training ...
 (min, max) time across ranks (ms):
-    model-and-optimizer-setup ......................: (145.13, 1119.82)
-    train/valid/test-data-iterators-setup ..........: (13.71, 327.86)
-[before the start of training step] datetime: 2025-10-30 15:38:44 
-[2025-10-30 15:38:44] [WARNING] [3752341] profiler.py: Invalid parameter export_type: None, reset it to text.
-[2025-10-30 15:38:44] [WARNING] [3752341] profiler.py: Invalid parameter export_type: None, reset it to text.
+    model-and-optimizer-setup ......................: (113.25, 1095.13)
+    train/valid/test-data-iterators-setup ..........: (16.46, 443.26)
+[before the start of training step] datetime: 2025-11-13 15:52:01 
+[2025-11-13 15:52:01] [WARNING] [2872764] profiler.py: Invalid parameter export_type: None, reset it to text.
+[2025-11-13 15:52:01] [WARNING] [2872764] profiler.py: Invalid parameter export_type: None, reset it to text.
 ========== now is iteration 1 ==========
-GPTModel forward
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:225: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  storage_ptr = tensor.storage().data_ptr()
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
 /data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
   warnings.warn("Flash Attention is highly recommended")
-rank 0 now the layer is 0
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
-rank 0 now the layer is 1
-rank 0 before allocation rss 1964.249088 MB
 /data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
   warnings.warn("Flash Attention is highly recommended")
-rank 1 now the layer is 2
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:225: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  storage_ptr = tensor.storage().data_ptr()
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 Allocated 0.008192 M elements for 2 tensors of type torch.int64 total length 8192 aligned size 8192
-rank 0 Allocated 144.703488 M elements for 7 tensors of type torch.uint8 total length 144703488 aligned size 144703488
-rank 0 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 0 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 0 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 0 before allocation rss 1995.743232 MB
-rank 1 now the layer is 3
-rank 1 before allocation rss 1946.333184 MB
-rank 0 Allocated 0.008192 M elements for 2 tensors of type torch.int64 total length 8192 aligned size 8192
-rank 0 Allocated 144.703488 M elements for 7 tensors of type torch.uint8 total length 144703488 aligned size 144703488
-rank 0 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 0 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 0 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-GPTModel forward
-rank 0 now the layer is 0
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 now the layer is 1
-rank 0 before allocation rss 2009.665536 MB
-/data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
-  warnings.warn("Flash Attention is highly recommended")
-rank 2 now the layer is 4
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:24: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
-rank 1 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 1 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 1 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-rank 1 Allocated 142.606336 M elements for 6 tensors of type torch.uint8 total length 142606336 aligned size 142606336
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 before allocation rss 1947.992064 MB
-rank 2 now the layer is 5
-rank 0 Allocated 0.008192 M elements for 2 tensors of type torch.int64 total length 8192 aligned size 8192
-rank 0 Allocated 144.703488 M elements for 7 tensors of type torch.uint8 total length 144703488 aligned size 144703488
-rank 0 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 0 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 0 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 1 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 1 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 1 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-rank 1 Allocated 142.606336 M elements for 6 tensors of type torch.uint8 total length 142606336 aligned size 142606336
-rank 1 now the layer is 2
-rank 0 before allocation rss 2024.882176 MB
-rank 1 now the layer is 3
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-rank 1 before allocation rss 1949.14304 MB
 Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
 Building extension module npu_matmul_add_fp32...
 Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
 ninja: no work to do.
 Loading extension module npu_matmul_add_fp32...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
+Building extension module npu_matmul_add_fp32...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module npu_matmul_add_fp32...
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
 /data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
   warnings.warn("Flash Attention is highly recommended")
-rank 3 now the layer is 6
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
-rank 0 Allocated 0.008192 M elements for 2 tensors of type torch.int64 total length 8192 aligned size 8192
-rank 0 Allocated 144.703488 M elements for 7 tensors of type torch.uint8 total length 144703488 aligned size 144703488
-rank 0 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 0 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 0 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:24: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
-rank 1 Allocated 2634.022912 M elements for 24 tensors of type torch.bfloat16 total length 2634022912 aligned size 2634022912
-rank 1 Allocated 0.032768 M elements for 8 tensors of type torch.float32 total length 32768 aligned size 32768
-rank 1 Allocated 16.777216 M elements for 1 tensors of type torch.bool total length 16777216 aligned size 16777216
-rank 1 Allocated 142.606336 M elements for 6 tensors of type torch.uint8 total length 142606336 aligned size 142606336
-rank 3 now the layer is 7
-rank 2 now the layer is 4
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
+Building extension module npu_matmul_add_fp32...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module npu_matmul_add_fp32...
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+/data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
+  warnings.warn("Flash Attention is highly recommended")
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
@@ -963,946 +957,84 @@ Building extension module npu_matmul_add_fp32...
 Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
 ninja: no work to do.
 Loading extension module npu_matmul_add_fp32...
-rank 3 now the layer is 6
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.83 GB/s (5.428 GB / 248.59 ms), 默认流等待H2D时间: 0.00 ms
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
-  _cleanup()
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 now the layer is 2
+rank 3 activation memory used is 7770.41845703125 MB
+rank 2 activation memory used is 12636.26171875 MB
+rank 1 activation memory used is 17988.40673828125 MB
+rank 0 activation memory used is 23316.80712890625 MB
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.02 GB/s (5.430 GB / 246.57 ms), 默认流等待H2D时间: 0.00 ms
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=105 encoding='UTF-8'>
-  _cleanup()
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 19.08 GB/s (5.428 GB / 284.42 ms), 默认流等待H2D时间: 241.23 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.82 GB/s (5.428 GB / 248.76 ms), 默认流等待H2D时间: 205.48 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 11.30 GB/s (5.430 GB / 480.41 ms), 默认流等待H2D时间: 436.91 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 21.68 GB/s (5.430 GB / 250.42 ms), 默认流等待H2D时间: 206.92 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.88 GB/s (5.428 GB / 248.10 ms), 默认流等待H2D时间: 204.87 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 18.85 GB/s (5.430 GB / 288.03 ms), 默认流等待H2D时间: 244.52 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 16.52 GB/s (5.428 GB / 328.57 ms), 默认流等待H2D时间: 285.35 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 H2D带宽: 21.80 GB/s (5.428 GB / 248.94 ms), 默认流等待H2D时间: 205.63 ms
-rank 0 H2D带宽: 12.56 GB/s (5.430 GB / 432.35 ms), 默认流等待H2D时间: 357.38 ms
-rank 3 activation memory used is 7642.41650390625 MB
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.02 ms), 默认流等待H2D时间: 215.33 ms
-rank 1 H2D带宽: 25.16 GB/s (5.428 GB / 215.75 ms), 默认流等待H2D时间: 214.07 ms
-rank 2 activation memory used is 12412.25830078125 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.77 ms), 默认流等待H2D时间: 210.51 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.05 ms), 默认流等待H2D时间: 215.37 ms
-rank 1 activation memory used is 12412.2490234375 MB
-rank 0 H2D带宽: 25.04 GB/s (5.430 GB / 216.88 ms), 默认流等待H2D时间: 215.20 ms
-rank 0 activation memory used is 12352.4228515625 MB
-rank 2 now the layer is 4
-rank 3 now the layer is 6
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 3 now the layer is 7
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
 ========== now is iteration 2 ==========
-GPTModel forward
-rank 1 now the layer is 2
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 1 now the layer is 3
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-rank 1 now the layer is 2
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 5
-rank 1 now the layer is 3
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 5
-rank 1 now the layer is 2
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.79 GB/s (5.428 GB / 249.10 ms), 默认流等待H2D时间: 205.86 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.97 GB/s (5.430 GB / 247.14 ms), 默认流等待H2D时间: 133.31 ms
-rank 3 now the layer is 6
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.31 GB/s (5.428 GB / 254.75 ms), 默认流等待H2D时间: 211.47 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.10 GB/s (5.430 GB / 245.72 ms), 默认流等待H2D时间: 83.38 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.73 GB/s (5.428 GB / 249.83 ms), 默认流等待H2D时间: 206.55 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 20.71 GB/s (5.430 GB / 262.20 ms), 默认流等待H2D时间: 94.55 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 15.23 GB/s (5.428 GB / 356.33 ms), 默认流等待H2D时间: 313.13 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.07 GB/s (5.428 GB / 257.56 ms), 默认流等待H2D时间: 214.32 ms
-rank 0 H2D带宽: 9.10 GB/s (5.430 GB / 596.80 ms), 默认流等待H2D时间: 321.54 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.76 GB/s (5.428 GB / 249.40 ms), 默认流等待H2D时间: 206.13 ms
-rank 0 H2D带宽: 9.89 GB/s (5.430 GB / 548.80 ms), 默认流等待H2D时间: 505.33 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.03 ms), 默认流等待H2D时间: 215.34 ms
-rank 1 H2D带宽: 25.17 GB/s (5.428 GB / 215.66 ms), 默认流等待H2D时间: 213.97 ms
-rank 2 activation memory used is 11308.26171875 MB
-rank 1 H2D带宽: 25.16 GB/s (5.428 GB / 215.72 ms), 默认流等待H2D时间: 211.07 ms
-rank 0 H2D带宽: 24.95 GB/s (5.430 GB / 217.58 ms), 默认流等待H2D时间: 215.90 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 17.83 GB/s (5.430 GB / 304.46 ms), 默认流等待H2D时间: 302.77 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 1 now the layer is 2
-rank 2 now the layer is 4
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
+  warnings.warn(
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26171875 MB
+rank 1 activation memory used is 16884.40673828125 MB
+rank 0 activation memory used is 22276.80615234375 MB
 ========== now is iteration 3 ==========
-GPTModel forward
-rank 2 now the layer is 5
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 3 now the layer is 7
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 0 now the layer is 1
-rank 2 now the layer is 5
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.82 GB/s (5.428 GB / 248.72 ms), 默认流等待H2D时间: 205.44 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.02 GB/s (5.430 GB / 246.60 ms), 默认流等待H2D时间: 129.57 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 6
-rank 0 now the layer is 1
-rank 3 now the layer is 7
-rank 1 H2D带宽: 15.03 GB/s (5.428 GB / 361.04 ms), 默认流等待H2D时间: 317.78 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.89 GB/s (5.428 GB / 247.92 ms), 默认流等待H2D时间: 204.68 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 11.39 GB/s (5.430 GB / 476.63 ms), 默认流等待H2D时间: 233.62 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 21.96 GB/s (5.430 GB / 247.22 ms), 默认流等待H2D时间: 203.66 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.53 GB/s (5.428 GB / 252.12 ms), 默认流等待H2D时间: 208.84 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 18.12 GB/s (5.430 GB / 299.61 ms), 默认流等待H2D时间: 250.07 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 17.69 GB/s (5.428 GB / 306.83 ms), 默认流等待H2D时间: 263.61 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 H2D带宽: 21.75 GB/s (5.428 GB / 249.51 ms), 默认流等待H2D时间: 206.30 ms
-rank 0 H2D带宽: 12.39 GB/s (5.430 GB / 438.13 ms), 默认流等待H2D时间: 367.93 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.03 GB/s (5.430 GB / 216.95 ms), 默认流等待H2D时间: 215.26 ms
-rank 1 H2D带宽: 25.11 GB/s (5.428 GB / 216.18 ms), 默认流等待H2D时间: 214.49 ms
-rank 2 activation memory used is 11308.25634765625 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.81 ms), 默认流等待H2D时间: 210.90 ms
-rank 0 H2D带宽: 25.01 GB/s (5.430 GB / 217.12 ms), 默认流等待H2D时间: 215.44 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 216.98 ms), 默认流等待H2D时间: 215.29 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 2 now the layer is 4
-rank 2 now the layer is 5
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
 ========== now is iteration 4 ==========
-rank 1 now the layer is 2
-rank 2 now the layer is 4
-rank 3 now the layer is 6
-rank 2 now the layer is 5
-rank 3 now the layer is 7
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-[rank1]:[W1030 15:39:03.875741636 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-[rank0]:[W1030 15:39:03.895417321 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 1 now the layer is 3
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 0 now the layer is 1
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 1 now the layer is 2
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 now the layer is 2
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 0 now the layer is 1
-GPTModel forward
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.80 GB/s (5.428 GB / 248.98 ms), 默认流等待H2D时间: 205.66 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.05 GB/s (5.430 GB / 246.29 ms), 默认流等待H2D时间: 140.83 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 H2D带宽: 21.90 GB/s (5.428 GB / 247.83 ms), 默认流等待H2D时间: 63.48 ms
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.46 GB/s (5.430 GB / 241.71 ms), 默认流等待H2D时间: 0.00 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.51 GB/s (5.428 GB / 252.35 ms), 默认流等待H2D时间: 209.08 ms
-rank 1 now the layer is 2
-rank 0 H2D带宽: 23.44 GB/s (5.430 GB / 231.68 ms), 默认流等待H2D时间: 72.78 ms
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 16.40 GB/s (5.428 GB / 330.98 ms), 默认流等待H2D时间: 140.75 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 12.14 GB/s (5.430 GB / 447.12 ms), 默认流等待H2D时间: 162.73 ms
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 22.70 GB/s (5.428 GB / 239.12 ms), 默认流等待H2D时间: 133.20 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 2
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-rank 0 H2D带宽: 23.78 GB/s (5.430 GB / 228.38 ms), 默认流等待H2D时间: 44.12 ms
-rank 1 H2D带宽: 21.23 GB/s (5.428 GB / 255.71 ms), 默认流等待H2D时间: 189.35 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.03 GB/s (5.430 GB / 216.93 ms), 默认流等待H2D时间: 215.24 ms
-rank 1 H2D带宽: 25.14 GB/s (5.428 GB / 215.87 ms), 默认流等待H2D时间: 214.18 ms
-rank 2 activation memory used is 11308.2587890625 MB
-rank 1 H2D带宽: 24.98 GB/s (5.428 GB / 217.24 ms), 默认流等待H2D时间: 211.89 ms
-rank 0 H2D带宽: 23.48 GB/s (5.430 GB / 231.24 ms), 默认流等待H2D时间: 229.55 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 13.73 GB/s (5.430 GB / 395.50 ms), 默认流等待H2D时间: 393.82 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 7
-rank 2 now the layer is 4
-rank 2 now the layer is 5
+[rank1]:[W1113 15:52:13.891463005 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
+[rank0]:[W1113 15:52:13.907671337 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
 ========== now is iteration 5 ==========
-rank 1 now the layer is 2
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 1 now the layer is 3
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 2
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.82 GB/s (5.428 GB / 248.75 ms), 默认流等待H2D时间: 205.47 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.04 GB/s (5.430 GB / 246.36 ms), 默认流等待H2D时间: 132.94 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 H2D带宽: 15.46 GB/s (5.428 GB / 351.18 ms), 默认流等待H2D时间: 78.76 ms
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.30 GB/s (5.430 GB / 254.88 ms), 默认流等待H2D时间: 24.38 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 23.00 GB/s (5.428 GB / 236.01 ms), 默认流等待H2D时间: 127.49 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 21.93 GB/s (5.430 GB / 247.55 ms), 默认流等待H2D时间: 203.95 ms
-rank 1 H2D带宽: 21.84 GB/s (5.428 GB / 248.54 ms), 默认流等待H2D时间: 205.29 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 2
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.30 GB/s (5.430 GB / 254.90 ms), 默认流等待H2D时间: 52.72 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 22.22 GB/s (5.428 GB / 244.31 ms), 默认流等待H2D时间: 201.09 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 H2D带宽: 23.90 GB/s (5.428 GB / 227.13 ms), 默认流等待H2D时间: 63.46 ms
-rank 0 H2D带宽: 8.54 GB/s (5.430 GB / 636.10 ms), 默认流等待H2D时间: 513.23 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 1 H2D带宽: 25.16 GB/s (5.428 GB / 215.70 ms), 默认流等待H2D时间: 214.01 ms
-rank 0 H2D带宽: 23.78 GB/s (5.430 GB / 228.30 ms), 默认流等待H2D时间: 221.91 ms
-rank 2 activation memory used is 11308.25634765625 MB
-rank 0 H2D带宽: 24.87 GB/s (5.430 GB / 218.33 ms), 默认流等待H2D时间: 216.64 ms
-rank 1 H2D带宽: 17.90 GB/s (5.428 GB / 303.23 ms), 默认流等待H2D时间: 291.06 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 22.75 GB/s (5.430 GB / 238.67 ms), 默认流等待H2D时间: 163.27 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 7
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-[2025-10-30 15:39:12] [WARNING] [3752341] profiler.py: Stop profiler while current state is RECORD_AND_SAVE, perhaps the scheduling cycle has not yet completed.
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-[2025-10-30 15:39:13] [INFO] [3760323] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_3752341_20251030073855049_ascend_pt
-|[2025-10-30 15:39:13] [INFO] [3760332] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_3752342_20251030073855048_ascend_pt
-|//--\\||//--[2025-10-30 15:39:21] [INFO] [3760407] profiler.py: CANN profiling data parsed in a total time of 0:00:08.034893
-[2025-10-30 15:39:21] [INFO] [3760430] profiler.py: CANN profiling data parsed in a total time of 0:00:08.045195
-\\||//--\\||//--\\||//--\\||//--\\||//--\\||//--\\||//--[2025-10-30 15:39:49] [INFO] [3760332] profiler.py: All profiling data parsed in a total time of 0:00:36.293002
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-\[2025-10-30 15:39:50] [INFO] [3760323] profiler.py: All profiling data parsed in a total time of 0:00:37.844291
-[2025-10-30 15:39:51] [WARNING] [3752341] profiler.py: Profiler is stopped, step takes no effect!
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
+[2025-11-13 15:52:16] [WARNING] [2872764] profiler.py: Stop profiler while current state is RECORD_AND_SAVE, perhaps the scheduling cycle has not yet completed.
+[2025-11-13 15:52:16] [INFO] [2878802] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_2872764_20251113075210685_ascend_pt
+[2025-11-13 15:52:16] [INFO] [2878798] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_2872765_20251113075210684_ascend_pt
+||//--\\||//-[2025-11-13 15:52:23] [INFO] [2878882] profiler.py: CANN profiling data parsed in a total time of 0:00:06.034921
+[2025-11-13 15:52:23] [INFO] [2878905] profiler.py: CANN profiling data parsed in a total time of 0:00:06.036170
+-\\||//--\[2025-11-13 15:52:28] [INFO] [2878798] profiler.py: All profiling data parsed in a total time of 0:00:11.489357
+[2025-11-13 15:52:28] [INFO] [2878802] profiler.py: All profiling data parsed in a total time of 0:00:12.001884
+[2025-11-13 15:52:28] [WARNING] [2872764] profiler.py: Profiler is stopped, step takes no effect!
 ========== now is iteration 6 ==========
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.80 GB/s (5.428 GB / 249.01 ms), 默认流等待H2D时间: 205.71 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.97 GB/s (5.430 GB / 247.17 ms), 默认流等待H2D时间: 131.45 ms
-rank 3 now the layer is 6
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 18.58 GB/s (5.428 GB / 292.10 ms), 默认流等待H2D时间: 248.87 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 17.36 GB/s (5.430 GB / 312.81 ms), 默认流等待H2D时间: 88.03 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.63 GB/s (5.428 GB / 250.98 ms), 默认流等待H2D时间: 207.73 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.92 GB/s (5.430 GB / 247.73 ms), 默认流等待H2D时间: 85.57 ms
-rank 3 now the layer is 6
-GPTModel forward
-rank 0 now the layer is 0
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 17.57 GB/s (5.428 GB / 308.85 ms), 默认流等待H2D时间: 265.61 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.78 GB/s (5.428 GB / 249.18 ms), 默认流等待H2D时间: 205.93 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 7.97 GB/s (5.430 GB / 681.68 ms), 默认流等待H2D时间: 467.89 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.84 GB/s (5.428 GB / 248.49 ms), 默认流等待H2D时间: 205.25 ms
-rank 0 H2D带宽: 11.92 GB/s (5.430 GB / 455.59 ms), 默认流等待H2D时间: 411.99 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.03 GB/s (5.430 GB / 216.97 ms), 默认流等待H2D时间: 215.28 ms
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.80 ms), 默认流等待H2D时间: 214.11 ms
-rank 2 activation memory used is 11308.2587890625 MB
-rank 1 H2D带宽: 25.16 GB/s (5.428 GB / 215.68 ms), 默认流等待H2D时间: 210.40 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 216.99 ms), 默认流等待H2D时间: 215.31 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 18.77 GB/s (5.430 GB / 289.32 ms), 默认流等待H2D时间: 287.63 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 1 now the layer is 2
-rank 2 now the layer is 4
-[2025-10-30 15:39:55] [WARNING] [3752341] profiler.py: Profiler is stopped, step takes no effect!
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
+[2025-11-13 15:52:30] [WARNING] [2872764] profiler.py: Profiler is stopped, step takes no effect!
 ========== now is iteration 7 ==========
-rank 2 now the layer is 5
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 3 now the layer is 7
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 0 now the layer is 1
-rank 2 now the layer is 5
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 0 now the layer is 1
-rank 2 now the layer is 5
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 0 now the layer is 1
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.82 GB/s (5.428 GB / 248.72 ms), 默认流等待H2D时间: 205.42 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.03 GB/s (5.430 GB / 246.50 ms), 默认流等待H2D时间: 131.83 ms
-GPTModel forward
-rank 3 now the layer is 6
-rank 0 now the layer is 0
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 14.04 GB/s (5.428 GB / 386.50 ms), 默认流等待H2D时间: 343.30 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.81 GB/s (5.428 GB / 248.83 ms), 默认流等待H2D时间: 205.57 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 9.31 GB/s (5.430 GB / 583.03 ms), 默认流等待H2D时间: 321.58 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 21.70 GB/s (5.430 GB / 250.23 ms), 默认流等待H2D时间: 206.67 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.80 GB/s (5.428 GB / 248.99 ms), 默认流等待H2D时间: 205.80 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 16.38 GB/s (5.430 GB / 331.41 ms), 默认流等待H2D时间: 287.98 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 15.08 GB/s (5.428 GB / 359.85 ms), 默认流等待H2D时间: 316.66 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 H2D带宽: 21.79 GB/s (5.428 GB / 249.06 ms), 默认流等待H2D时间: 205.82 ms
-rank 0 H2D带宽: 9.10 GB/s (5.430 GB / 596.48 ms), 默认流等待H2D时间: 520.50 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.84 ms), 默认流等待H2D时间: 214.15 ms
-rank 0 H2D带宽: 24.93 GB/s (5.430 GB / 217.83 ms), 默认流等待H2D时间: 216.14 ms
-rank 2 activation memory used is 11308.25634765625 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.80 ms), 默认流等待H2D时间: 209.58 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 216.99 ms), 默认流等待H2D时间: 215.30 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 25.03 GB/s (5.430 GB / 216.91 ms), 默认流等待H2D时间: 215.23 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 1 now the layer is 2
-rank 2 now the layer is 4
-[2025-10-30 15:39:59] [WARNING] [3752341] profiler.py: Profiler is stopped, step takes no effect!
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
+[2025-11-13 15:52:31] [WARNING] [2872764] profiler.py: Profiler is stopped, step takes no effect!
 ========== now is iteration 8 ==========
-rank 2 now the layer is 5
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 22.54 GB/s (5.428 GB / 240.83 ms), 默认流等待H2D时间: 197.56 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.97 GB/s (5.430 GB / 247.18 ms), 默认流等待H2D时间: 72.98 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.52 GB/s (5.428 GB / 252.26 ms), 默认流等待H2D时间: 209.06 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 20.92 GB/s (5.430 GB / 259.53 ms), 默认流等待H2D时间: 78.93 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.57 GB/s (5.428 GB / 251.64 ms), 默认流等待H2D时间: 208.39 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 21.81 GB/s (5.430 GB / 248.94 ms), 默认流等待H2D时间: 81.78 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 13.81 GB/s (5.428 GB / 392.93 ms), 默认流等待H2D时间: 349.77 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.73 GB/s (5.428 GB / 249.81 ms), 默认流等待H2D时间: 206.59 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 8.42 GB/s (5.430 GB / 645.18 ms), 默认流等待H2D时间: 311.92 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.87 GB/s (5.428 GB / 248.18 ms), 默认流等待H2D时间: 204.91 ms
-rank 0 H2D带宽: 13.47 GB/s (5.430 GB / 403.12 ms), 默认流等待H2D时间: 359.53 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 1 H2D带宽: 25.14 GB/s (5.428 GB / 215.87 ms), 默认流等待H2D时间: 214.18 ms
-rank 0 H2D带宽: 24.93 GB/s (5.430 GB / 217.81 ms), 默认流等待H2D时间: 216.12 ms
-rank 2 activation memory used is 11308.2587890625 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.80 ms), 默认流等待H2D时间: 209.49 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.04 ms), 默认流等待H2D时间: 215.35 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 20.45 GB/s (5.430 GB / 265.47 ms), 默认流等待H2D时间: 263.78 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 2 now the layer is 4
-rank 1 now the layer is 2
-[2025-10-30 15:40:03] [WARNING] [3752341] profiler.py: Profiler is stopped, step takes no effect!
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
+[2025-11-13 15:52:33] [WARNING] [2872764] profiler.py: Profiler is stopped, step takes no effect!
 ========== now is iteration 9 ==========
-rank 2 now the layer is 5
-GPTModel forward
-rank 0 now the layer is 0
-rank 1 now the layer is 3
-rank 2 now the layer is 4
-rank 3 now the layer is 6
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 3 now the layer is 7
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.81 GB/s (5.428 GB / 248.85 ms), 默认流等待H2D时间: 205.62 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.04 GB/s (5.430 GB / 246.33 ms), 默认流等待H2D时间: 134.03 ms
-GPTModel forward
-rank 3 now the layer is 6
-rank 0 now the layer is 0
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 H2D带宽: 15.75 GB/s (5.428 GB / 344.50 ms), 默认流等待H2D时间: 301.28 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.79 GB/s (5.428 GB / 249.10 ms), 默认流等待H2D时间: 205.82 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 9.72 GB/s (5.430 GB / 558.33 ms), 默认流等待H2D时间: 324.73 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 21.79 GB/s (5.430 GB / 249.24 ms), 默认流等待H2D时间: 205.64 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.76 GB/s (5.428 GB / 249.40 ms), 默认流等待H2D时间: 206.14 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 17.46 GB/s (5.430 GB / 311.06 ms), 默认流等待H2D时间: 266.35 ms
-rank 1 H2D带宽: 16.78 GB/s (5.428 GB / 323.41 ms), 默认流等待H2D时间: 280.17 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 1 H2D带宽: 21.54 GB/s (5.428 GB / 251.93 ms), 默认流等待H2D时间: 208.74 ms
-rank 0 H2D带宽: 10.50 GB/s (5.430 GB / 517.29 ms), 默认流等待H2D时间: 473.68 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.00 GB/s (5.430 GB / 217.17 ms), 默认流等待H2D时间: 215.48 ms
-rank 1 H2D带宽: 25.16 GB/s (5.428 GB / 215.72 ms), 默认流等待H2D时间: 214.03 ms
-rank 2 activation memory used is 11308.25634765625 MB
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.78 ms), 默认流等待H2D时间: 210.28 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.01 ms), 默认流等待H2D时间: 215.32 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 25.00 GB/s (5.430 GB / 217.16 ms), 默认流等待H2D时间: 215.48 ms
-rank 0 activation memory used is 11312.421875 MB
-rank 1 now the layer is 2
-rank 2 now the layer is 4
-[2025-10-30 15:40:08] [WARNING] [3752341] profiler.py: Profiler is stopped, step takes no effect!
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
+[2025-11-13 15:52:34] [WARNING] [2872764] profiler.py: Profiler is stopped, step takes no effect!
 ========== now is iteration 10 ==========
-rank 2 now the layer is 5
-GPTModel forward
-rank 1 now the layer is 3
-rank 0 now the layer is 0
-rank 3 now the layer is 6
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 7
-rank 0 now the layer is 1
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 1 now the layer is 2
-rank 0 now the layer is 1
-rank 1 now the layer is 3
-GPTModel forward
-rank 2 now the layer is 4
-rank 0 now the layer is 0
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-GPTModel forward
-rank 0 now the layer is 0
-rank 2 now the layer is 5
-rank 0 now the layer is 1
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 2 now the layer is 4
-rank 2 now the layer is 5
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.82 GB/s (5.428 GB / 248.79 ms), 默认流等待H2D时间: 205.46 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 22.00 GB/s (5.430 GB / 246.80 ms), 默认流等待H2D时间: 150.17 ms
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.57 GB/s (5.428 GB / 251.64 ms), 默认流等待H2D时间: 208.41 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 0 H2D带宽: 20.80 GB/s (5.430 GB / 261.01 ms), 默认流等待H2D时间: 158.25 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.50 GB/s (5.428 GB / 252.48 ms), 默认流等待H2D时间: 209.22 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 0 H2D带宽: 21.72 GB/s (5.430 GB / 250.00 ms), 默认流等待H2D时间: 154.75 ms
-rank 3 now the layer is 7
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 14.68 GB/s (5.428 GB / 369.76 ms), 默认流等待H2D时间: 326.55 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 3 now the layer is 6
-rank 3 now the layer is 7
-rank 1 H2D带宽: 21.64 GB/s (5.428 GB / 250.81 ms), 默认流等待H2D时间: 207.59 ms
-rank 1 now the layer is 2
-rank 1 now the layer is 3
-rank 0 H2D带宽: 9.98 GB/s (5.430 GB / 544.23 ms), 默认流等待H2D时间: 299.82 ms
-GPTModel forward
-rank 0 now the layer is 0
-rank 0 now the layer is 1
-rank 1 H2D带宽: 21.72 GB/s (5.428 GB / 249.92 ms), 默认流等待H2D时间: 206.70 ms
-rank 0 H2D带宽: 11.93 GB/s (5.430 GB / 455.22 ms), 默认流等待H2D时间: 411.65 ms
-rank 3 activation memory used is 6538.41455078125 MB
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.02 ms), 默认流等待H2D时间: 215.34 ms
-rank 1 H2D带宽: 25.15 GB/s (5.428 GB / 215.78 ms), 默认流等待H2D时间: 214.10 ms
-rank 2 activation memory used is 11308.2587890625 MB
-rank 1 H2D带宽: 25.12 GB/s (5.428 GB / 216.06 ms), 默认流等待H2D时间: 211.04 ms
-rank 0 H2D带宽: 25.02 GB/s (5.430 GB / 217.04 ms), 默认流等待H2D时间: 215.36 ms
-rank 1 activation memory used is 11308.2470703125 MB
-rank 0 H2D带宽: 18.07 GB/s (5.430 GB / 300.42 ms), 默认流等待H2D时间: 298.73 ms
-rank 0 activation memory used is 11312.421875 MB
+rank 3 activation memory used is 6666.41650390625 MB
+rank 2 activation memory used is 11532.26220703125 MB
+rank 1 activation memory used is 16884.41015625 MB
+rank 0 activation memory used is 22276.80615234375 MB
 Number of parameters in transformer layers in billions:  1.41
 Number of parameters in embedding layers in billions: 0.26
 Total number of parameters in billions: 1.67
 Number of parameters in most loaded shard in billions: 0.4834
 Number of parameters in other shards in billions: 0.3524
 Theoretical memory footprints: weight and optimizer=8298.60 MB
- [2025-10-30 15:40:12] iteration       10/ 4577636 | consumed samples:           80 | elapsed time per iteration (ms): 8803.4 | learning rate: 2.621447E-08 | global batch size:     8 | lm loss: 1.044924E+01 | loss scale: 1.0 | grad norm: 21.083 | number of skipped iterations:   0 | number of nan iterations:   0 |
-[Rank 1] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 18461.91552734375 | reserved: 19346.0 | max reserved: 19346.0
-[Rank 0] (after 10 iterations) memory (MB) | allocated: 9627.67138671875 | max allocated: 20940.09326171875 | reserved: 21896.0 | max reserved: 21896.0
-[Rank 3] (after 10 iterations) memory (MB) | allocated: 9403.81591796875 | max allocated: 15942.23046875 | reserved: 16716.0 | max reserved: 16716.0
-[Rank 2] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 18461.92724609375 | reserved: 22280.0 | max reserved: 22280.0
-[exiting program at iteration 10] datetime: 2025-10-30 15:40:12 
+ [2025-11-13 15:52:35] iteration       10/ 4577636 | consumed samples:           80 | elapsed time per iteration (ms): 3406.6 | learning rate: 2.621447E-08 | global batch size:     8 | lm loss: 1.043696E+01 | loss scale: 1.0 | grad norm: 21.294 | number of skipped iterations:   0 | number of nan iterations:   0 |
+[Rank 1] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 24038.07861328125 | reserved: 27456.0 | max reserved: 27456.0
+[Rank 0] (after 10 iterations) memory (MB) | allocated: 9627.67138671875 | max allocated: 31904.4775390625 | reserved: 35276.0 | max reserved: 35276.0
+[Rank 2] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 18685.9306640625 | reserved: 21074.0 | max reserved: 21074.0
+[Rank 3] (after 10 iterations) memory (MB) | allocated: 9403.81591796875 | max allocated: 16070.232421875 | reserved: 16728.0 | max reserved: 16728.0
+[exiting program at iteration 10] datetime: 2025-11-13 15:52:35 
