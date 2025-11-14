@@ -29,7 +29,7 @@ from megatron.core.tensor_parallel import (
     get_data_parallel_rng_tracker_name,
     reduce_scatter_to_sequence_parallel_region_from_moe,
 )
-from megatron.core.pipeline_parallel.offload import ActivationStore, save_rng_states
+# from megatron.core.pipeline_parallel.offload import ActivationStore, save_rng_states
 from megatron.legacy.model.enums import AttnMaskType, AttnType, LayerType
 from megatron.legacy.model.fused_bias_gelu import bias_gelu_impl
 from megatron.legacy.model.fused_softmax import FusedScaleMaskSoftmax
@@ -167,8 +167,8 @@ class ParallelMLP(MegatronModule):
             assert self.add_bias is True
             assert self.activation_func == F.gelu
             intermediate_parallel_output = bias_gelu_impl(intermediate_parallel, bias_parallel)
-            if get_args().recompute_lgd:
-                ActivationStore.recompute_tensor(intermediate_parallel_output, [intermediate_parallel, bias_parallel], bias_gelu_impl)
+            # if get_args().recompute_lgd:
+            #     ActivationStore.recompute_tensor(intermediate_parallel_output, [intermediate_parallel, bias_parallel], bias_gelu_impl)
             intermediate_parallel = intermediate_parallel_output
 
         else:
@@ -1179,8 +1179,8 @@ class ParallelTransformerLayer(MegatronModule):
 
         # Layer norm at the beginning of the transformer layer.
         norm_output = self.input_norm(hidden_states)
-        if get_args().recompute_lgd:
-            ActivationStore.recompute_tensor(norm_output, [hidden_states], self.input_norm)
+        # if get_args().recompute_lgd:
+        #     ActivationStore.recompute_tensor(norm_output, [hidden_states], self.input_norm)
         # Self attention.
         attention_output, attention_bias = \
             self.self_attention(
@@ -1224,8 +1224,8 @@ class ParallelTransformerLayer(MegatronModule):
 
         # Layer norm post the self attention.
         norm_output = self.post_attention_norm(norm_input)
-        if get_args().recompute_lgd:
-            ActivationStore.recompute_tensor(norm_output, [norm_input], self.post_attention_norm)
+        # if get_args().recompute_lgd:
+        #     ActivationStore.recompute_tensor(norm_output, [norm_input], self.post_attention_norm)
   
         # Cross attention.
         if self.layer_type == LayerType.encoder:

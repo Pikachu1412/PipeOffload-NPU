@@ -107,16 +107,14 @@ options=" \
   --use-distributed-optimizer 
   "
 OFFLOAD_ARGS=(
-  --is-a-view-opti
   --tensorboard-dir ./logs/test
-  --cpu-offload 
+  # --cpu-offload 
+  --kaimm-offload-activation-ratio 0.5
   --bind-cpu
-  # --async-offload
-  --no-paired-barrier
   --optimizer-selection fused_torch_adamw 
   --offload-overlap-sr
   # --sequence-parallel 
-  --recompute-lgd
+
   --use-legacy-models
   --ckpt-format torch
   --profile

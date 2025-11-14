@@ -1293,6 +1293,8 @@ def _add_training_args(parser):
     group.add_argument('--is-a-view-opti', action='store_true', help='优化is_a_view的查找速度')
     group.add_argument('--async-offload', action='store_true', help='异步offload')
     group.add_argument('--bind-cpu', action='store_true', help='NUMA 绑定cpu')
+    group.add_argument('--kaimm-offload-activation-ratio', type=float, default=0.,
+                    help='The proportion of offloaded activations relative to total activations.')
     return parser
 
 
