@@ -14,7 +14,7 @@ from megatron.core.transformer.enums import AttnMaskType
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.transformer_config import TransformerConfig
 from megatron.core.transformer.utils import attention_mask_func
-from megatron.core.utils import divide
+from megatron.core.utils import divide, record_memory_delta_and_time
 
 
 class DotProductAttention(MegatronModule):
@@ -98,6 +98,9 @@ class DotProductAttention(MegatronModule):
         attn_mask_type: AttnMaskType = None,
         packed_seq_params: Optional[PackedSeqParams] = None,
     ):
+        from megatron.core.pipeline_parallel.offload import ActivationStore
+        from megatron.training import get_args
+        args = get_args()
         assert packed_seq_params is None, (
             "Packed sequence is not supported by DotProductAttention."
             "Please use TEDotProductAttention instead."
@@ -113,13 +116,14 @@ class DotProductAttention(MegatronModule):
         # match the number of queries.
 
         # attn_mask_type is not used.
-        if self.num_attention_heads_per_partition // self.num_query_groups_per_partition > 1:
-            key = key.repeat_interleave(
-                self.num_attention_heads_per_partition // self.num_query_groups_per_partition, dim=2
-            )
-            value = value.repeat_interleave(
-                self.num_attention_heads_per_partition // self.num_query_groups_per_partition, dim=2
-            )
+        with record_memory_delta_and_time("repeat_interleave"):
+            if self.num_attention_heads_per_partition // self.num_query_groups_per_partition > 1:
+                key = key.repeat_interleave(
+                    self.num_attention_heads_per_partition // self.num_query_groups_per_partition, dim=2
+                )
+                value = value.repeat_interleave(
+                    self.num_attention_heads_per_partition // self.num_query_groups_per_partition, dim=2
+                )
 
         # [b, np, sq, sk]
         output_size = (query.size(1), query.size(2), query.size(0), key.size(0))
@@ -138,33 +142,49 @@ class DotProductAttention(MegatronModule):
         )
 
         # Raw attention scores. [b * np, sq, sk]
-        matmul_result = torch.baddbmm(
-            matmul_input_buffer,
-            query.transpose(0, 1),  # [b * np, sq, hn]
-            key.transpose(0, 1).transpose(1, 2),  # [b * np, hn, sk]
-            beta=0.0,
-            alpha=(1.0 / self.norm_factor),
-        )
-
+        with record_memory_delta_and_time("qkT"):
+            # Store function and arguments for later use
+            fn_args = (matmul_input_buffer, query.transpose(0, 1), key.transpose(0, 1).transpose(1, 2))
+            fn_kwargs = {'beta': 0.0, 'alpha': (1.0 / self.norm_factor)}
+            fn = torch.baddbmm
+            matmul_result = fn(*fn_args, **fn_kwargs)   
+        # if True:#args.recompute_lgd:
+        #     ActivationStore.recompute_tensor(matmul_result, [*fn_args, fn_kwargs], fn)
         # change view to [b, np, sq, sk]
         attention_scores = matmul_result.view(*output_size)
-
         # ===========================
         # Attention probs and dropout
         # ===========================
-
+        with record_memory_delta_and_time("scaled_softmax"):
         # attention scores and attention mask [b, np, sq, sk]
-        attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
+            attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
+            
+        if False:#args.recompute_lgd:
+            ActivationStore.recompute_tensor(attention_probs, [attention_scores, attention_mask], self.scale_mask_softmax)
 
+         # 获取 attention_probs 的最后两维尺寸
+        # sq, sk = attention_probs.shape[-2], attention_probs.shape[-1]
+        # # 创建恒等矩阵
+        # identity_matrix = torch.eye(sq, sk, dtype=attention_probs.dtype, device=attention_probs.device, requires_grad=True)
+        # # 将恒等矩阵扩展到与 attention_probs 相同的形状
+        # # identity_matrix = identity_matrix.unsqueeze(0).unsqueeze(0)  # [1, 1, sq, sk]
+        # # identity_matrix = identity_matrix.expand(attention_probs.shape[0], attention_probs.shape[1], -1, -1)  # [b, np, sq, sk]
+        # # 与 attention_probs 相乘
+        # attention_probs = attention_probs @ identity_matrix
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
-
-        if not self.config.sequence_parallel:
-            with tensor_parallel.get_cuda_rng_tracker().fork():
-                attention_probs = self.attention_dropout(attention_probs)
-        else:
-            attention_probs = self.attention_dropout(attention_probs)
-
+        with record_memory_delta_and_time("attn_dropout"):
+            
+            if not self.config.sequence_parallel:
+                ctx = tensor_parallel.get_cuda_rng_tracker().fork()
+                with ctx:
+                    attention_probs1 = self.attention_dropout(attention_probs)
+            else:
+                attention_probs1 = self.attention_dropout(attention_probs)
+        # context layer shape: [b, np, sq, hn]
+        output_size = (value.size(1), value.size(2), query.size(0), value.size(3))
+        if True:#args.recompute_lgd:
+            ActivationStore.recompute_tensor(attention_probs1, [attention_probs], self.attention_dropout, [output_size[0] * output_size[1], output_size[2], -1])
         # =========================
         # Context layer. [sq, b, hp]
         # =========================
@@ -172,17 +192,17 @@ class DotProductAttention(MegatronModule):
         # value -> context layer.
         # [sk, b, np, hn] --> [b, np, sq, hn]
 
-        # context layer shape: [b, np, sq, hn]
-        output_size = (value.size(1), value.size(2), query.size(0), value.size(3))
+        
 
         # change view [sk, b * np, hn]
         value = value.view(value.size(0), output_size[0] * output_size[1], -1)
 
         # change view [b * np, sq, sk]
-        attention_probs = attention_probs.view(output_size[0] * output_size[1], output_size[2], -1)
+        attention_probs1 = attention_probs1.view(output_size[0] * output_size[1], output_size[2], -1)
 
         # matmul: [b * np, sq, hn]
-        context = torch.bmm(attention_probs, value.transpose(0, 1))
+        with record_memory_delta_and_time("score@V"):
+            context = torch.bmm(attention_probs1, value.transpose(0, 1))
 
         # change view [b, np, sq, hn]
         context = context.view(*output_size)

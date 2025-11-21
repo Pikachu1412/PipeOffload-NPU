@@ -14,7 +14,7 @@ from megatron.core.transformer.identity_op import IdentityFuncOp, IdentityOp
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.utils import is_npu_available, make_viewless_tensor
+from megatron.core.utils import is_npu_available, make_viewless_tensor, record_memory_delta_and_time
 
 
 @dataclass
@@ -270,36 +270,47 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
                 context (Tensor): Updated context tensor if cross-attention is used,
                 otherwise None.
         """
-
+        # Import here to avoid circular import
+        from megatron.training import get_args
+        from megatron.core.pipeline_parallel.offload import ActivationStore
+        args = get_args()
         # Residual connection.
         residual = hidden_states
 
         # Optional Input Layer norm
-        input_layernorm_output = self.input_layernorm(hidden_states)
-
+        with record_memory_delta_and_time("input_layer_norm"):
+            input_layernorm_output = self.input_layernorm(hidden_states)
+        if args.recompute_lgd:
+            ActivationStore.recompute_tensor(input_layernorm_output, [hidden_states], self.input_layernorm)
         # Self attention.
-        attention_output_with_bias = self.self_attention(
-            input_layernorm_output,
-            attention_mask=attention_mask,
-            inference_params=inference_params,
-            rotary_pos_emb=rotary_pos_emb,
-            packed_seq_params=packed_seq_params,
-        )
+        with record_memory_delta_and_time("self_attention"):
+            attention_output_with_bias = self.self_attention(
+                input_layernorm_output,
+                attention_mask=attention_mask,
+                inference_params=inference_params,
+                rotary_pos_emb=rotary_pos_emb,
+                packed_seq_params=packed_seq_params,
+            )
 
         # TODO: could we move `bias_dropout_add_exec_handler` itself
         # inside the module provided in the `bias_dropout_add_spec` module?
-        with self.bias_dropout_add_exec_handler():
-            hidden_states = self.self_attn_bda(self.training, self.config.bias_dropout_fusion)(
-                attention_output_with_bias, residual, self.hidden_dropout
-            )
+        with record_memory_delta_and_time("self_attention_bda"):
+            with self.bias_dropout_add_exec_handler():
+                func = self.self_attn_bda(self.training, self.config.bias_dropout_fusion)
+                hidden_states = func(attention_output_with_bias, residual, self.hidden_dropout)
+        if args.recompute_lgd:
+            ActivationStore.recompute_tensor(hidden_states, [attention_output_with_bias, 
+                                            residual, self.hidden_dropout], func)
 
         # Residual connection.
         residual = hidden_states
 
         # Optional Layer norm after self-attention
+        # with record_memory_delta_and_time("cross_attention_layernorm"):
         pre_cross_attn_layernorm_output = self.pre_cross_attn_layernorm(hidden_states)
 
         # Cross attention.
+        # with record_memory_delta_and_time("cross_attention"):
         attention_output_with_bias = self.cross_attention(
             pre_cross_attn_layernorm_output,
             attention_mask=context_mask,
@@ -312,6 +323,7 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
 
         # TODO: could we move `bias_dropout_add_exec_handler` itself
         # inside the module provided in the `bias_dropout_add_spec` module?
+        # with record_memory_delta_and_time("cross_attention_bda"):
         with self.bias_dropout_add_exec_handler():
             hidden_states = self.cross_attn_bda(self.training, self.config.bias_dropout_fusion)(
                 attention_output_with_bias, residual, self.hidden_dropout
@@ -319,20 +331,24 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
 
         # Residual connection.
         residual = hidden_states
-
         # Optional Layer norm post the cross-attention.
-        pre_mlp_layernorm_output = self.pre_mlp_layernorm(hidden_states)
-
+        with record_memory_delta_and_time("pre_mlp_layernorm"):
+            pre_mlp_layernorm_output = self.pre_mlp_layernorm(hidden_states)
+        if args.recompute_lgd:
+            ActivationStore.recompute_tensor(pre_mlp_layernorm_output, [hidden_states], self.pre_mlp_layernorm)
         # MLP.
-        mlp_output_with_bias = self.mlp(pre_mlp_layernorm_output)
+        with record_memory_delta_and_time("mlp"):
+            mlp_output_with_bias = self.mlp(pre_mlp_layernorm_output)
+        if args.recompute_lgd:
+            ActivationStore.recompute_tensor(mlp_output_with_bias, [pre_mlp_layernorm_output], self.mlp)
 
         # TODO: could we move `bias_dropout_add_exec_handler` itself
         # inside the module provided in the `bias_dropout_add_spec` module?
-        with self.bias_dropout_add_exec_handler():
-            hidden_states = self.mlp_bda(self.training, self.config.bias_dropout_fusion)(
-                mlp_output_with_bias, residual, self.hidden_dropout
-            )
-
+        with record_memory_delta_and_time("mlp_bda"):
+            with self.bias_dropout_add_exec_handler():
+                func = self.mlp_bda(self.training, self.config.bias_dropout_fusion)
+                hidden_states = func(mlp_output_with_bias, residual, self.hidden_dropout)
+        # ActivationStore.recompute_tensor(hidden_states, [mlp_output_with_bias, residual, self.hidden_dropout], func)
         # Jit compiled function creates 'view' tensor. This tensor
         # potentially gets saved in the MPU checkpoint function context,
         # which rejects view tensors. While making a viewless tensor here
@@ -342,8 +358,7 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
         output = make_viewless_tensor(
             inp=hidden_states, requires_grad=hidden_states.requires_grad, keep_graph=True
         )
-        # Import here to avoid circular import
-        from megatron.training import get_args
+        
         args = get_args()
         if args.adaptive_recompute and not hasattr(args, "get_expected_memory"):
             if is_npu_available():

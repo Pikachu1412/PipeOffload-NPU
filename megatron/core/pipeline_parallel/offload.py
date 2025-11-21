@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import gc
 from megatron.core import parallel_state
-
+from contextlib import nullcontext
 
 def checksum(tensor):
     with torch.no_grad():
@@ -55,117 +55,55 @@ class PartialRecompute(saved_tensors_hooks):
     def _resume_tensor(self, packed):
         type, info = packed
         if type == PartialRecompute.RecomputeSaveType.RECOMPUTE:
-            parents, function, rng_states = info
+            parents, function, view_size, rng_states = info
             with torch.no_grad():
                 if rng_states is not None:
                     current_rng_states = save_rng_states()
                     restore_rng_states(rng_states)
+                # context = self.context if self.context is not None else nullcontext
+                # with context:
                 r = function(*parents)
+                if view_size is not None:
+                    r = r.view(*view_size)
+                self.context = None
+                self.kwargs = None
                 if rng_states is not None:
                     restore_rng_states(current_rng_states)
+            if self.bias != None:
+                r = (r, self.bias)
+                self.bias =None
             return r
         return info
 
     def __init__(self):
         self._next_recompute_tensor = None
+        self.bias = None
+        self.kwargs = None
+        self.context = None
         super().__init__(self._save_tensor, self._resume_tensor)
 
-    def _recompute_tensor(self, tensor, parents, function, rng_states=None):
+    def _recompute_tensor(self, tensor, parents, function, view_size=None, rng_states=None):
         assert self._next_recompute_tensor is None
-        self._next_recompute_tensor = (tensor, parents, function, rng_states)
+        if isinstance(tensor, tuple):
+            assert self.bias == None
+            self.bias = tensor[1]
+            tensor = tensor[0]
+        
+        # if isinstance(parents[-2], dict):
+        #     assert self.kwargs == None
+        #     self.kwargs = parents[-2]
+        # if parents[-1] != None:
+        #     assert self.context == None
+        #     self.context = parents[-1]
+        self._next_recompute_tensor = (tensor, parents, function, view_size, rng_states)
 
 
 partial_recompute = PartialRecompute()
 
-# 全局线程池，用于异步等待offload完成并执行release
-# 使用较小的线程数，因为这些线程主要是等待GPU event
-_offload_release_thread_pool = None
-
-
-def get_offload_release_thread_pool():
-    """获取或创建全局的offload release线程池"""
-    global _offload_release_thread_pool
-    if _offload_release_thread_pool is None:
-        # 使用较小的线程池，因为主要是等待操作
-        _offload_release_thread_pool = ThreadPoolExecutor(
-            max_workers=5, thread_name_prefix="offload_release"
-        )
-    return _offload_release_thread_pool
-
-
-class PairedBarrier:
-    last_event = None
-    event = None
-
-    @classmethod
-    def record(cls):
-        # Only after the current exchange communication completes,
-        # can we know the last event has been used by the peer device,
-        # and we can safely free it.
-        return
-        cls.last_event = cls.event
-        from megatron.training import get_args
-        if not get_args().paired_barrier:
-            return
-        cls.event = torch.cuda.Event(interprocess=True)
-        cls.event.record()
-        cls.ipc_handle = cls.event.ipc_handle()
-
-    @classmethod
-    def wait_peer(cls, peer: int = None):
-        return
-        from megatron.training import get_args
-        if not get_args().paired_barrier:
-            return
-        if peer is None:
-            peer = torch.distributed.get_rank() ^ 1
-            # Skip if peer is out of world size
-            if peer >= torch.distributed.get_world_size():
-                return
-
-        if cls.event is None:
-            # If no event is recorded, create a new one current state.
-            cls.record()
-        peer_handle = bytearray(len(cls.ipc_handle))
-
-        s = torch.distributed.isend(tensor=torch.frombuffer(
-            bytearray(cls.ipc_handle), dtype=torch.uint8), dst=peer)
-        torch.distributed.recv(tensor=torch.frombuffer(peer_handle, dtype=torch.uint8), src=peer)
-        s.wait()
-
-        cls.last_event = None
-        peer_event = torch.cuda.Event.from_ipc_handle(
-            torch.cuda.current_device(), bytes(peer_handle))
-        peer_event.wait()
-
-
-class FakeActivationStore:
-    @classmethod
-    def barrier(cls):
-        return
-        from megatron.training import get_args
-        assert not get_args().offload_overlap_sr
-        cls.offload()
-
-    @classmethod
-    def resume(cls):
-        return
-        with torch.cuda.stream(get_offload_h2d_stream()):
-            PairedBarrier.wait_peer()
-        return
-
-    @classmethod
-    def offload(cls):
-        return
-        with torch.cuda.stream(get_offload_d2h_stream()):
-            PairedBarrier.wait_peer()
-        return
-
-
 class ActivationStore(saved_tensors_hooks):
     @classmethod
-    def recompute_tensor(cls, tensor, parents, function, rng_states=None):
-        return partial_recompute._recompute_tensor(tensor, parents, function, rng_states)
+    def recompute_tensor(cls, tensor, parents, function, view_size=None, rng_states=None):
+        return partial_recompute._recompute_tensor(tensor, parents, function, view_size, rng_states)
 
     def __enter__(self):
         assert not hasattr(
@@ -205,9 +143,9 @@ class ActivationStore(saved_tensors_hooks):
         assert not self._offloaded
         # print(f"this tensor contiguous is {tensor.is_contiguous()}, the shape is {tensor.shape}")
         # print(f"Received tensor type: {type(tensor)}, is Parameter: {isinstance(tensor, torch.nn.parameter.Parameter)}")
-        # if not tensor.is_contiguous():
-        #     # print(f"type is {type(tensor)}")
-        #     tensor = tensor.contiguous()
+        if not tensor.is_contiguous():
+            # print(f"type is {type(tensor)}")
+            tensor = tensor.contiguous()
         self._change_state({ActivationStore.State.NEW, ActivationStore.State.SAVING},
                            ActivationStore.State.SAVING)
         if isinstance(tensor, torch.nn.parameter.Parameter):
@@ -218,9 +156,10 @@ class ActivationStore(saved_tensors_hooks):
             return ActivationStore.SaveType.PASS_THROUGH, tensor
         recompute = partial_recompute._save_tensor(tensor)
         if recompute[0] == PartialRecompute.RecomputeSaveType.RECOMPUTE:
-            (parents, function, rng_states) = recompute[1]
+            (parents, function, view_size, rng_states) = recompute[1]
             parent_handles = [self._save_tensor(x) for x in parents]
-            return ActivationStore.SaveType.RECOMPUTE, (parent_handles, function, rng_states)
+            # parent_handles = [x for x in parents]
+            return ActivationStore.SaveType.RECOMPUTE, (parent_handles, function, view_size, rng_states)
         if self.is_a_view_opti:
             # 优化：使用哈希表查找，从 O(n) 降到 O(1)
             storage_ptr = tensor.storage().data_ptr()
@@ -260,6 +199,15 @@ class ActivationStore(saved_tensors_hooks):
             assert (self._offload_tensor_info[len(self._gpu_store) - 1] == tensor_info(tensor))
         self._save_event.record()
         # print(f"rank {torch.distributed.get_rank()} Saving tensor id {len(self._gpu_store) - 1} {id(tensor)} {tensor.shape}, dtype {tensor.dtype}, device {tensor.device} storage {tensor.storage().data_ptr()}")
+        # if len(self._gpu_store)>=44:
+        #     if torch.distributed.get_rank()==0:
+        #         print("------------------------------------------")
+        #         print(len(self._gpu_store))
+        #         for x in self._gpu_store:
+        #             print(f"{x.shape} {x.dtype}")
+        #         print("------------------------------------------")
+        # if self._gpu_store[-1].shape==torch.Size([4096, 1, 4096]):
+        #     print("123")
         return (ActivationStore.SaveType.OFFLOAD, len(self._gpu_store) - 1)
 
     def _resume_tensor(self, packed, remove_used=True):
@@ -271,9 +219,10 @@ class ActivationStore(saved_tensors_hooks):
             # print(f"In Resume rank:{torch.distributed.get_rank()} main_grad:{hasattr(info, 'main_grad')} Received tensor type: {info.__class__}, is Parameter: {isinstance(info, torch.nn.parameter.Parameter)}")
             return info
         if type == ActivationStore.SaveType.RECOMPUTE:
-            p_infos, function, rng_states = info
+            p_infos, function, view_size, rng_states = info
             parents = [self._resume_tensor(x, remove_used=False) for x in p_infos]
-            return partial_recompute._resume_tensor((PartialRecompute.RecomputeSaveType.RECOMPUTE, (parents, function, rng_states)))
+            # parents = [x for x in p_infos]
+            return partial_recompute._resume_tensor((PartialRecompute.RecomputeSaveType.RECOMPUTE, (parents, function, view_size, rng_states)))
         if packed[0] == ActivationStore.SaveType.ALIAS:
             dtype, index, shape, stride, offset = packed[1]
 
@@ -669,9 +618,6 @@ def get_offload_h2d_stream():
 
 
 def get_offload_d2h_stream():
-    from megatron.training import get_args
-    if not get_args().offload_overlap_sr:
-        return get_offload_h2d_stream()
     global d2h_stream
     if d2h_stream is None:
         d2h_stream = torch.cuda.Stream()

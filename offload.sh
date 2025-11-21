@@ -96,17 +96,19 @@ options=" \
   --use-distributed-optimizer 
   "
 OFFLOAD_ARGS=(
+  # --num-layers-per-virtual-pipeline-stage 1
   --is-a-view-opti
   --tensorboard-dir ./logs/test
-  # --cpu-offload 
+  --cpu-offload 
   --bind-cpu
-  --no-paired-barrier
   --optimizer-selection fused_torch_adamw 
-  --offload-overlap-sr
   # --sequence-parallel 
-  --recompute-lgd
+  # --recompute-lgd
   # --use-legacy-models
   # --ckpt-format torch
+  # --recompute-granularity full
+  # --recompute-method block
+  # --recompute-num-layers 2
   --profile
   --profile-ranks 0 1
   --use-pytorch-profiler
@@ -116,13 +118,6 @@ OFFLOAD_ARGS=(
 
 # 将OFFLOAD_ARGS拼接到options中
 options="$options ${OFFLOAD_ARGS[@]}"
-
-# if [ ! -z "$PROFILED" ]; then
-#   options="$options --profile"
-# fi
-
-
-
 
 if [ ! -z "$ENABLE_EXACTLY_NUMERIC_MATCH" ]; then
   options="$options --enable-exactly-numeric-match \

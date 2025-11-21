@@ -17,7 +17,7 @@ from megatron.core.parallel_state import (
 )
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.spec_utils import ModuleSpec, build_module
-from megatron.core.utils import divide
+from megatron.core.utils import divide, record_memory_delta_and_time
 
 from .enums import AttnMaskType
 from .transformer_config import TransformerConfig
@@ -248,7 +248,8 @@ class Attention(MegatronModule, ABC):
         # =====================
         # Get the query, key and value tensors based on the type of attention -
         # self or cross attn.
-        query, key, value = self.get_query_key_value_tensors(hidden_states, key_value_states)
+        with record_memory_delta_and_time("qkv"):
+            query, key, value = self.get_query_key_value_tensors(hidden_states, key_value_states)
 
         # ===================================================
         # Adjust key, value, and rotary_pos_emb for inference
@@ -316,8 +317,8 @@ class Attention(MegatronModule, ABC):
         # =================
         # Output. [sq, b, h]
         # =================
-
-        output, bias = self.linear_proj(core_attn_out)
+        with record_memory_delta_and_time("attn_linear"):
+            output, bias = self.linear_proj(core_attn_out)
 
         return output, bias
 

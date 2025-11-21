@@ -21,6 +21,7 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
+import torch_npu
 from packaging.version import Version as PkgVersion
 
 from megatron.core import parallel_state
@@ -1344,14 +1345,39 @@ def timing_wait(func):
         print(f"Wait time: {wait_time:.4f} ms")
         return result
     return wrapper
-
-# @contextmanager
-# def record_wait_time(event_name: str = "event"):
-#     return
-#     start_time = time.perf_counter()
-#     try:
-#         yield
-#     finally:
-#         # torch.cuda.synchronize()
-#         wait_time = (time.perf_counter() - start_time) * 1000
-#         print(f"{event_name} wait time: {wait_time:.4f} ms")
+static_time = {}
+static_cnt = {}
+@contextmanager
+def record_memory_delta_and_time(event_name: str = "event", device: Optional[Union[int, torch.device]] = None):
+    yield
+    return
+    if torch.distributed.get_rank() != 0:
+        yield
+        return
+    device = torch_npu.npu.current_device()
+    # 查询指定NPU设备的已分配内存
+    start_allocated = torch_npu.npu.memory_allocated(device)
+    # device = torch.cuda.current_device() if device is None else device
+    # torch.cuda.synchronize(device)
+    # start_allocated = torch.cuda.memory_allocated(device)
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        wait_time = (time.perf_counter() - start_time) * 1000
+        # torch.cuda.synchronize(device)
+        end_allocated = torch_npu.npu.memory_allocated(device)
+        # end_allocated = torch.cuda.memory_allocated(device)
+        # end_reserved = torch.cuda.memory_reserved(device)
+        delta_allocated = (end_allocated - start_allocated) / (1024 * 1024)
+        global static_time
+        global static_cnt
+        if event_name not in static_time:
+            static_time[event_name] = wait_time
+            static_cnt[event_name] = 1
+        else:
+            static_cnt[event_name] += 1
+            static_time[event_name] += wait_time
+        print(f"{event_name} wait time: {wait_time:.4f} ms avg_time: {static_time[event_name] / static_cnt[event_name]:.4f} ms"
+              f" start: {start_allocated / (1024 * 1024):.3f} MB end: {end_allocated / (1024 * 1024):.3f} MB"
+              f" allocated Δ: {delta_allocated:.3f} MB")

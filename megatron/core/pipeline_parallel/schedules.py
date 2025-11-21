@@ -18,7 +18,7 @@ from megatron.core.utils import (
     get_model_xattn,
 )
 
-from megatron.core.pipeline_parallel.offload import ActivationStorePool, partial_recompute, FakeActivationStore
+from megatron.core.pipeline_parallel.offload import ActivationStorePool, partial_recompute
 from megatron.training import get_args
 activation_store_pool = ActivationStorePool()
 
@@ -1397,10 +1397,6 @@ def forward_backward_pipelining_without_interleaving(
         input_tensors = []
         output_tensors = []
     forward_data_store = []
-    # Eager   rank compute stream: ....FFBBBBFFBBBB
-    #       offload stream       : ...RRRSSSRRRSSS
-    # Delayed rank compute stream: ......FFBBBBFFBBBB
-    #       offload stream       : RRRSSSRRRSSSRRRSSS
 
     # Run warmup forward passes.
     import psutil

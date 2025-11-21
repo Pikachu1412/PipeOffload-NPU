@@ -1281,15 +1281,11 @@ def _add_training_args(parser):
     group.add_argument('--cpu-offload', action='store_true', help='Offload activation to CPU.')
     group.add_argument('--recompute-lgd', action='store_true',
                        help='Recompute layernorm, gelu and dropout.')
-    group.add_argument('--no-paired-barrier', action='store_false',
-                       help='Disable paired barrier for offload.', dest='paired_barrier')
     group.add_argument('--measure-activation-memory', action='store_true',
                        help='Measure activation memory.')
     group.add_argument('--offload-continuous-buffers', action='store_true',
                        help='Use continuous buffers in offload.')
     group.add_argument('--adaptive-recompute', action='store_true', help='Adaptive recompute.')
-    group.add_argument('--offload-overlap-sr', action='store_true',
-                       help='overlap save and resume in offload')
     group.add_argument('--is-a-view-opti', action='store_true', help='优化is_a_view的查找速度')
     group.add_argument('--bind-cpu', action='store_true', help='NUMA 绑定cpu')
     return parser
