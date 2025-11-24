@@ -42,7 +42,7 @@ from megatron.legacy.model.utils import (
 from megatron.training import get_args, get_timers
 
 from .module import MegatronModule
-from ssy_utils import print_memory_status, print_rank_0
+# from ssy_utils import print_memory_status, print_rank_0
 try:
     from einops import rearrange
 except ImportError:

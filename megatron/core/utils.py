@@ -21,7 +21,7 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
-import torch_npu
+
 from packaging.version import Version as PkgVersion
 
 from megatron.core import parallel_state

@@ -36,7 +36,7 @@ LOG_INTERVAL=10
 WORLD_SIZE_IN_GPUS=$(( $WORLD_SIZE * $GPUS_PER_NODE ))
 
 PIPELINE_SIZE=$GPUS_PER_NODE
-LAYERS=$(( $PIPELINE_SIZE * 2))
+LAYERS=$(( $PIPELINE_SIZE * 1))
 MICRO_BATCH_SIZE=1
 GLOBAL_BATCH_SIZE=$(( 8 ))
 HIDDEN_SIZE=4096
@@ -85,6 +85,7 @@ options=" \
   --init-method-std 0.006 \
   --no-barrier-with-level-1-timing \
   --transformer-impl local \
+  --no-persist-layer-norm \
   --no-bias-dropout-fusion \
   --no-create-attention-mask-in-dataloader \
   --untie-embeddings-and-output-weights \
@@ -101,14 +102,15 @@ OFFLOAD_ARGS=(
   --tensorboard-dir ./logs/test
   --cpu-offload 
   --bind-cpu
-  --optimizer-selection fused_torch_adamw 
+  # --optimizer-selection fused_torch_adamw 
   # --sequence-parallel 
   # --recompute-lgd
+  # --recompute
   # --use-legacy-models
   # --ckpt-format torch
   # --recompute-granularity full
   # --recompute-method block
-  # --recompute-num-layers 2
+  # --recompute-num-layers 1
   --profile
   --profile-ranks 0 1
   --use-pytorch-profiler

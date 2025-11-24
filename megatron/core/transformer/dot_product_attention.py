@@ -152,60 +152,52 @@ class DotProductAttention(MegatronModule):
         #     ActivationStore.recompute_tensor(matmul_result, [*fn_args, fn_kwargs], fn)
         # change view to [b, np, sq, sk]
         attention_scores = matmul_result.view(*output_size)
-        # ===========================
-        # Attention probs and dropout
-        # ===========================
-        with record_memory_delta_and_time("scaled_softmax"):
-        # attention scores and attention mask [b, np, sq, sk]
-            attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
-            
-        if False:#args.recompute_lgd:
-            ActivationStore.recompute_tensor(attention_probs, [attention_scores, attention_mask], self.scale_mask_softmax)
-
-         # 获取 attention_probs 的最后两维尺寸
-        # sq, sk = attention_probs.shape[-2], attention_probs.shape[-1]
-        # # 创建恒等矩阵
-        # identity_matrix = torch.eye(sq, sk, dtype=attention_probs.dtype, device=attention_probs.device, requires_grad=True)
-        # # 将恒等矩阵扩展到与 attention_probs 相同的形状
-        # # identity_matrix = identity_matrix.unsqueeze(0).unsqueeze(0)  # [1, 1, sq, sk]
-        # # identity_matrix = identity_matrix.expand(attention_probs.shape[0], attention_probs.shape[1], -1, -1)  # [b, np, sq, sk]
-        # # 与 attention_probs 相乘
-        # attention_probs = attention_probs @ identity_matrix
-        # This is actually dropping out entire tokens to attend to, which might
-        # seem a bit unusual, but is taken from the original Transformer paper.
-        with record_memory_delta_and_time("attn_dropout"):
-            
-            if not self.config.sequence_parallel:
-                ctx = tensor_parallel.get_cuda_rng_tracker().fork()
-                with ctx:
-                    attention_probs1 = self.attention_dropout(attention_probs)
-            else:
-                attention_probs1 = self.attention_dropout(attention_probs)
-        # context layer shape: [b, np, sq, hn]
-        output_size = (value.size(1), value.size(2), query.size(0), value.size(3))
-        if True:#args.recompute_lgd:
-            ActivationStore.recompute_tensor(attention_probs1, [attention_probs], self.attention_dropout, [output_size[0] * output_size[1], output_size[2], -1])
-        # =========================
-        # Context layer. [sq, b, hp]
-        # =========================
-
-        # value -> context layer.
-        # [sk, b, np, hn] --> [b, np, sq, hn]
-
         
-
-        # change view [sk, b * np, hn]
-        value = value.view(value.size(0), output_size[0] * output_size[1], -1)
-
-        # change view [b * np, sq, sk]
-        attention_probs1 = attention_probs1.view(output_size[0] * output_size[1], output_size[2], -1)
-
-        # matmul: [b * np, sq, hn]
-        with record_memory_delta_and_time("score@V"):
-            context = torch.bmm(attention_probs1, value.transpose(0, 1))
-
-        # change view [b, np, sq, hn]
-        context = context.view(*output_size)
+        # ===========================
+        # Core Attention with Checkpoint
+        # ===========================
+        # 定义核心 attention 计算函数，用于 checkpoint
+        # 这部分显存占用大（attention_probs: 128MB）但计算相对轻量
+        def core_attention_forward(attention_scores, value):
+            # Softmax
+            with record_memory_delta_and_time("scaled_softmax"):
+                attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
+            
+            # Dropout
+            with record_memory_delta_and_time("attn_dropout"):
+                if not self.config.sequence_parallel:
+                    ctx = tensor_parallel.get_cuda_rng_tracker().fork()
+                    with ctx:
+                        attention_probs1 = self.attention_dropout(attention_probs)
+                else:
+                    attention_probs1 = self.attention_dropout(attention_probs)
+            
+            # Context layer shape: [b, np, sq, hn]
+            output_size_inner = (value.size(1), value.size(2), attention_scores.size(2), value.size(3))
+            
+            # change view [sk, b * np, hn]
+            value_reshaped = value.view(value.size(0), output_size_inner[0] * output_size_inner[1], -1)
+            
+            # change view [b * np, sq, sk]
+            attention_probs1_reshaped = attention_probs1.view(
+                output_size_inner[0] * output_size_inner[1], output_size_inner[2], -1
+            )
+            
+            # matmul: [b * np, sq, hn]
+            with record_memory_delta_and_time("score@V"):
+                context = torch.bmm(attention_probs1_reshaped, value_reshaped.transpose(0, 1))
+            
+            # change view [b, np, sq, hn]
+            context = context.view(*output_size_inner)
+            return context
+        
+        # 使用 checkpoint 节省 attention_probs 的显存（约 128 MB）
+        if args.recompute:
+            context = tensor_parallel.checkpoint(
+                core_attention_forward, False, attention_scores, value
+            )
+        else:
+            context = core_attention_forward(attention_scores, value)
 
         # [b, np, sq, hn] --> [sq, b, np, hn]
         context = context.permute(2, 0, 1, 3).contiguous()

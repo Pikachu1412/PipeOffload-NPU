@@ -1281,6 +1281,8 @@ def _add_training_args(parser):
     group.add_argument('--cpu-offload', action='store_true', help='Offload activation to CPU.')
     group.add_argument('--recompute-lgd', action='store_true',
                        help='Recompute layernorm, gelu and dropout.')
+    group.add_argument('--recompute', action='store_true',
+                       help='Recompute by tensor_parallel.checkpoint.')
     group.add_argument('--measure-activation-memory', action='store_true',
                        help='Measure activation memory.')
     group.add_argument('--offload-continuous-buffers', action='store_true',

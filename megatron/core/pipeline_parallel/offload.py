@@ -463,12 +463,6 @@ class ActivationStore(saved_tensors_hooks):
                     # print(f"rank {torch.distributed.get_rank()} Storage of tensor {tensor.shape} size {tensor.storage().size()/1000000} MB already in set")
                     pass
                 # print(f"Saving buffer to cpu shape {buffer.shape}, dtype {buffer.dtype}, device {buffer.device}")
-                # 剪切操作：每copy完一个tensor就立即释放GPU缓冲区
-                # has_nan = torch.any(torch.isnan(tensor))
-                # if has_nan:
-                #     print("卸载后张量中包含 NaN")
-                # self._gpu_store[index] = None
-            # PairedBarrier.record()
 
             # 记录结束时间
             self._offload_end_event.record()
@@ -506,31 +500,7 @@ class ActivationStore(saved_tensors_hooks):
                 )
                 self._first_offload_release_call = False
 
-        # 记录释放前 GPU store 的信息
-        # num_tensors = len(self._gpu_store)
-        # if num_tensors > 0 and torch.cuda.is_available():
-        #     total_size = sum(t.numel() * t.element_size() for t in self._gpu_store) / (1024**3)
-        #     print(f"rank {torch.distributed.get_rank()} [offload_release] "
-        #           f"Releasing {num_tensors} GPU tensors, total size: {total_size:.3f} GB")
-        #  # 记录执行前的显存
-
-        # # torch.cuda.synchronize()  # 确保之前的操作完成
-        # mem_before = torch.cuda.memory_allocated() / (1024**3)  # GB
-        # mem_reserved_before = torch.cuda.memory_reserved() / (1024**3)  # GB
-        # print(f"rank {torch.distributed.get_rank()} [Before offload_release] "
-        #       f"Allocated: {mem_before:.3f} GB, Reserved: {mem_reserved_before:.3f} GB")
         self._gpu_store.clear()
-        # 记录执行后的显存
-
-        # torch.cuda.synchronize()  # 确保release操作完成
-        # mem_after = torch.cuda.memory_allocated() / (1024**3)  # GB
-        # mem_reserved_after = torch.cuda.memory_reserved() / (1024**3)  # GB
-        # mem_freed = mem_before - mem_after
-        # mem_reserved_freed = mem_reserved_before - mem_reserved_after
-        # print(f"rank {torch.distributed.get_rank()} [After offload_release] "
-        #       f"Allocated: {mem_after:.3f} GB, Reserved: {mem_reserved_after:.3f} GB")
-        # print(f"rank {torch.distributed.get_rank()} [Memory Released] "
-        #       f"Freed Allocated: {mem_freed:.3f} GB, Freed Reserved: {mem_reserved_freed:.3f} GB")
 
     @torch.no_grad()
     # @torch.cuda.nvtx.range("PrepareResume")
@@ -582,11 +552,6 @@ class ActivationStore(saved_tensors_hooks):
             # 记录H2D结束时间
             self._resume_end_event.record()
             self._resume_event.record()
-            # for dtype, bins in self._continuous_cpu_buffer.items():
-            #     for (cpu, gpu) in zip(bins, self._continuous_gpu_buffer[dtype]):
-            #         has_nan = torch.any(torch.isnan(gpu))
-            #         if has_nan:
-            #             print("resume后张量中包含 NaN")
 
         self._offloaded = False
 

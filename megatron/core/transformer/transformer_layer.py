@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 
 import torch
 
-from megatron.core import parallel_state
+from megatron.core import parallel_state, tensor_parallel
 from megatron.core.dist_checkpointing.mapping import ShardedStateDict
 from megatron.core.dist_checkpointing.utils import apply_prefix_mapping
 from megatron.core.transformer.cuda_graphs import CudaGraphManager
@@ -334,13 +334,13 @@ class TransformerLayer(MegatronModule, BaseTransformerLayer):
         # Optional Layer norm post the cross-attention.
         with record_memory_delta_and_time("pre_mlp_layernorm"):
             pre_mlp_layernorm_output = self.pre_mlp_layernorm(hidden_states)
-        if args.recompute_lgd:
-            ActivationStore.recompute_tensor(pre_mlp_layernorm_output, [hidden_states], self.pre_mlp_layernorm)
+        # if args.recompute_lgd:
+        #     ActivationStore.recompute_tensor(pre_mlp_layernorm_output, [hidden_states], self.pre_mlp_layernorm)
         # MLP.
         with record_memory_delta_and_time("mlp"):
             mlp_output_with_bias = self.mlp(pre_mlp_layernorm_output)
-        if args.recompute_lgd:
-            ActivationStore.recompute_tensor(mlp_output_with_bias, [pre_mlp_layernorm_output], self.mlp)
+        # if args.recompute_lgd:
+        #     ActivationStore.recompute_tensor(mlp_output_with_bias, [pre_mlp_layernorm_output], self.mlp)
 
         # TODO: could we move `bias_dropout_add_exec_handler` itself
         # inside the module provided in the `bias_dropout_add_spec` module?
