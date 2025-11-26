@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from megatron.core import parallel_state
+from megatron.core import parallel_state, tensor_parallel
 from megatron.core.dist_checkpointing import ShardedTensor
 from megatron.core.dist_checkpointing.mapping import (
     ReplicaId,
@@ -17,6 +17,7 @@ from megatron.core.dist_checkpointing.mapping import (
 from megatron.core.fusions.fused_bias_geglu import bias_geglu_impl
 from megatron.core.fusions.fused_bias_gelu import bias_gelu_impl
 from megatron.core.fusions.fused_bias_swiglu import bias_swiglu_impl
+from megatron.core.pipeline_parallel.offload import ActivationStore
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.transformer.transformer_config import TransformerConfig
@@ -94,38 +95,53 @@ class MLP(MegatronModule):
         )
 
     def forward(self, hidden_states):
-
-        # [s, b, 4 * h/p]
-        with record_memory_delta_and_time("uppermlp"):
-            intermediate_parallel, bias_parallel = self.linear_fc1(hidden_states)
-        with record_memory_delta_and_time("gelu"):
-            if self.config.bias_activation_fusion:
-                if self.activation_func == F.gelu:
-                    if self.config.gated_linear_unit:
-                        intermediate_parallel = bias_geglu_impl(intermediate_parallel, bias_parallel)
+        
+        # 定义一个包含 FC1 + Activation 的函数用于 checkpoint
+        def fc1_with_activation(hidden_states):
+            # [s, b, 4 * h/p]
+            with record_memory_delta_and_time("uppermlp"):
+                intermediate_parallel, bias_parallel = self.linear_fc1(hidden_states)
+            with record_memory_delta_and_time("gelu"):
+                if self.config.bias_activation_fusion:
+                    if self.activation_func == F.gelu:
+                        if self.config.gated_linear_unit:
+                            intermediate_parallel = bias_geglu_impl(intermediate_parallel, bias_parallel)
+                        else:
+                            assert self.config.add_bias_linear is True
+                            intermediate_parallel = bias_gelu_impl(intermediate_parallel, bias_parallel)
+                    elif self.activation_func == F.silu and self.config.gated_linear_unit:
+                        intermediate_parallel = bias_swiglu_impl(
+                            intermediate_parallel,
+                            bias_parallel,
+                            self.config.activation_func_fp8_input_store,
+                        )
                     else:
-                        assert self.config.add_bias_linear is True
-                        intermediate_parallel = bias_gelu_impl(intermediate_parallel, bias_parallel)
-                elif self.activation_func == F.silu and self.config.gated_linear_unit:
-                    intermediate_parallel = bias_swiglu_impl(
-                        intermediate_parallel,
-                        bias_parallel,
-                        self.config.activation_func_fp8_input_store,
-                    )
+                        raise ValueError("Only support fusion of gelu and swiglu")
                 else:
-                    raise ValueError("Only support fusion of gelu and swiglu")
-            else:
-                if bias_parallel is not None:
-                    intermediate_parallel = intermediate_parallel + bias_parallel
-                if self.config.gated_linear_unit:
+                    if bias_parallel is not None:
+                        intermediate_parallel = intermediate_parallel + bias_parallel
+                    if self.config.gated_linear_unit:
 
-                    def glu(x):
-                        x = torch.chunk(x, 2, dim=-1)
-                        return self.config.activation_func(x[0]) * x[1]
+                        def glu(x):
+                            x = torch.chunk(x, 2, dim=-1)
+                            return self.config.activation_func(x[0]) * x[1]
 
-                    intermediate_parallel = glu(intermediate_parallel)
-                else:
-                    intermediate_parallel = self.activation_func(intermediate_parallel)
+                        intermediate_parallel = glu(intermediate_parallel)
+                    else:
+                        intermediate_parallel = self.activation_func(intermediate_parallel)
+            return intermediate_parallel
+        
+        # 使用 checkpoint 重计算 FC1 + Activation，节省中间激活值显存
+        # 这里只保存 hidden_states，不保存 intermediate_parallel (4x hidden_size)
+        from megatron.core import tensor_parallel
+        from megatron.training import get_args
+        args = get_args()
+        if args.recompute:
+            intermediate_parallel = tensor_parallel.checkpoint(
+                fc1_with_activation, False, hidden_states
+            )
+        else:
+            intermediate_parallel = fc1_with_activation(hidden_states)
 
         # [s, b, h]
         with record_memory_delta_and_time("downmlp"):

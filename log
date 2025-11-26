@@ -1,8 +1,8 @@
-torchrun --nnodes 1 --node_rank 0 --master_addr localhost --master_port 6479 --nproc_per_node=4 /data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py --tensor-model-parallel-size 1 --pipeline-model-parallel-size 4 --num-layers 8 --hidden-size 4096 --ffn-hidden-size 16384 --num-attention-heads 32 --group-query-attention --num-query-groups 8 --exit-interval 10 --seq-length 4096 --max-position-embeddings 4096 --micro-batch-size 1 --global-batch-size 8 --train-samples 36621093 --lr-decay-samples 31738281 --lr-warmup-samples 183105 --lr 6.0e-5 --min-lr 6.0e-6 --lr-decay-style cosine --log-interval 10 --eval-iters 40 --eval-interval 10000 --data-path /tmp/zb_sample_dataset/dataset/c4_text_document --tokenizer-type GPTSentencePieceTokenizer --tokenizer-model /tmp/zb_sample_dataset/tokenizers/tokenizer.model --split 98,2,0 --clip-grad 8.0 --weight-decay 0.1 --adam-beta1 0.9 --adam-beta2 0.95 --init-method-std 0.006 --no-barrier-with-level-1-timing --transformer-impl local --no-bias-dropout-fusion --no-create-attention-mask-in-dataloader --untie-embeddings-and-output-weights --initial-loss-scale 65536 --measure-activation-memory --use-tp-pp-dp-mapping --offload-continuous-buffers --bf16 --use-distributed-optimizer --is-a-view-opti --tensorboard-dir ./logs/test --cpu-offload --bind-cpu --optimizer-selection fused_torch_adamw --profile --profile-ranks 0 1 --use-pytorch-profiler --profile-step-start 3 --profile-step-end 5
-W1121 11:56:40.614124 2166718 site-packages/torch/distributed/run.py:792] 
-W1121 11:56:40.614124 2166718 site-packages/torch/distributed/run.py:792] *****************************************
-W1121 11:56:40.614124 2166718 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
-W1121 11:56:40.614124 2166718 site-packages/torch/distributed/run.py:792] *****************************************
+torchrun --nnodes 1 --node_rank 0 --master_addr localhost --master_port 6479 --nproc_per_node=8 /data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py --tensor-model-parallel-size 2 --pipeline-model-parallel-size 4 --num-layers 8 --hidden-size 4096 --ffn-hidden-size 16384 --num-attention-heads 32 --group-query-attention --num-query-groups 8 --exit-interval 10 --seq-length 16384 --max-position-embeddings 16384 --micro-batch-size 1 --global-batch-size 8 --train-samples 9155273 --lr-decay-samples 7934570 --lr-warmup-samples 183105 --lr 6.0e-5 --min-lr 6.0e-6 --lr-decay-style cosine --log-interval 10 --eval-iters 40 --eval-interval 10000 --data-path /tmp/zb_sample_dataset/dataset/c4_text_document --tokenizer-type GPTSentencePieceTokenizer --tokenizer-model /tmp/zb_sample_dataset/tokenizers/tokenizer.model --split 98,2,0 --clip-grad 8.0 --weight-decay 0.1 --adam-beta1 0.9 --adam-beta2 0.95 --init-method-std 0.006 --no-barrier-with-level-1-timing --transformer-impl local --no-bias-dropout-fusion --no-create-attention-mask-in-dataloader --untie-embeddings-and-output-weights --initial-loss-scale 65536 --measure-activation-memory --use-tp-pp-dp-mapping --offload-continuous-buffers --bf16 --use-distributed-optimizer --is-a-view-opti --tensorboard-dir ./logs/test --cpu-offload --bind-cpu --optimizer-selection fused_torch_adamw --sequence-parallel --profile --profile-ranks 0 1 --use-pytorch-profiler --profile-step-start 3 --profile-step-end 5
+W1125 15:09:37.802309 602576 site-packages/torch/distributed/run.py:792] 
+W1125 15:09:37.802309 602576 site-packages/torch/distributed/run.py:792] *****************************************
+W1125 15:09:37.802309 602576 site-packages/torch/distributed/run.py:792] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1125 15:09:37.802309 602576 site-packages/torch/distributed/run.py:792] *****************************************
 /data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch_npu/contrib/transfer_to_npu.py:298: ImportWarning: 
     *************************************************************************************************************
     The torch.Tensor.cuda and torch.nn.Module.cuda are replaced with torch.Tensor.npu and torch.nn.Module.npu now..
@@ -17,11 +17,15 @@ W1121 11:56:40.614124 2166718 site-packages/torch/distributed/run.py:792] ******
 /data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch_npu/contrib/transfer_to_npu.py:255: RuntimeWarning: torch.jit.script and torch.jit.script_method will be disabled by transfer_to_npu, which currently does not support them, if you need to enable them, please do not use transfer_to_npu.
   warnings.warn(msg, RuntimeWarning)
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
+Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
 /data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch_npu/dynamo/torchair/__init__.py:8: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
   import pkg_resources
 Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py:29: DeprecationWarning: The 'megatron.core.transformer.custom_layers.transformer_engine' 
     module is deprecated and will be removed in 0.10.0. Please use 
     'megatron.core.extensions.transformer_engine' instead.
@@ -38,7 +42,39 @@ Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
     module is deprecated and will be removed in 0.10.0. Please use 
     'megatron.core.extensions.transformer_engine' instead.
   from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
-using world size: 4, data-parallel size: 1, context-parallel size: 1, tensor-model-parallel size: 1, encoder-tensor-model-parallel size: 0, pipeline-model-parallel size: 4, encoder-pipeline-model-parallel size: 0
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py:29: DeprecationWarning: The 'megatron.core.transformer.custom_layers.transformer_engine' 
+    module is deprecated and will be removed in 0.10.0. Please use 
+    'megatron.core.extensions.transformer_engine' instead.
+  from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py:29: DeprecationWarning: The 'megatron.core.transformer.custom_layers.transformer_engine' 
+    module is deprecated and will be removed in 0.10.0. Please use 
+    'megatron.core.extensions.transformer_engine' instead.
+  from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py:29: DeprecationWarning: The 'megatron.core.transformer.custom_layers.transformer_engine' 
+    module is deprecated and will be removed in 0.10.0. Please use 
+    'megatron.core.extensions.transformer_engine' instead.
+  from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py:29: DeprecationWarning: The 'megatron.core.transformer.custom_layers.transformer_engine' 
+    module is deprecated and will be removed in 0.10.0. Please use 
+    'megatron.core.extensions.transformer_engine' instead.
+  from megatron.core.transformer.custom_layers.transformer_engine import SplitAlongDim
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+> setting tensorboard ...
+WARNING: one_logger package is required to enable e2e metrics tracking. please go to https://confluence.nvidia.com/display/MLWFO/Package+Repositories for details to install it
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+using world size: 8, data-parallel size: 1, context-parallel size: 1, tensor-model-parallel size: 2, encoder-tensor-model-parallel size: 0, pipeline-model-parallel size: 4, encoder-pipeline-model-parallel size: 0
 WARNING: overriding default arguments for tokenizer_type:GPT2BPETokenizer                        with tokenizer_type:GPTSentencePieceTokenizer
 WARNING: Setting args.overlap_p2p_comm and args.align_param_gather to False since non-interleaved schedule does not support overlapping p2p communication and aligned param AG
 accumulate and all-reduce gradients in fp32 for bfloat16 data type.
@@ -77,7 +113,7 @@ using torch.bfloat16 for parameters ...
   apply_residual_connection_post_layernorm ........ False
   apply_rope_fusion ............................... True
   async_save ...................................... None
-  async_tensor_model_parallel_allreduce ........... True
+  async_tensor_model_parallel_allreduce ........... False
   attention_dropout ............................... 0.1
   attention_mask_on_cpu ........................... False
   attention_mask_type ............................. causal
@@ -179,7 +215,7 @@ using torch.bfloat16 for parameters ...
   enable_zero3 .................................... False
   encoder_num_layers .............................. 8
   encoder_pipeline_model_parallel_size ............ 0
-  encoder_seq_length .............................. 4096
+  encoder_seq_length .............................. 16384
   encoder_tensor_model_parallel_size .............. 0
   end_weight_decay ................................ 0.1
   eod_mask_loss ................................... False
@@ -254,7 +290,7 @@ using torch.bfloat16 for parameters ...
   loss_scale_window ............................... 1000
   lr .............................................. 6e-05
   lr_decay_iters .................................. None
-  lr_decay_samples ................................ 31738281
+  lr_decay_samples ................................ 7934570
   lr_decay_style .................................. cosine
   lr_warmup_fraction .............................. None
   lr_warmup_init .................................. 0.0
@@ -273,7 +309,7 @@ using torch.bfloat16 for parameters ...
   masked_softmax_fusion ........................... True
   master_addr ..................................... None
   master_port ..................................... None
-  max_position_embeddings ......................... 4096
+  max_position_embeddings ......................... 16384
   max_tokens_to_oom ............................... 12000
   mbs_idx ......................................... None
   measure_activation_memory ....................... True
@@ -400,6 +436,7 @@ using torch.bfloat16 for parameters ...
   query_in_block_prob ............................. 0.1
   rampup_batch_size ............................... None
   rank ............................................ 0
+  recompute ....................................... False
   recompute_activation_function ................... False
   recompute_activation_function_num_layers ........ None
   recompute_granularity ........................... None
@@ -448,8 +485,8 @@ using torch.bfloat16 for parameters ...
   save_memory_ratio ............................... 0.2
   scatter_gather_tensors_in_pipeline .............. True
   seed ............................................ 1234
-  seq_length ...................................... 4096
-  sequence_parallel ............................... False
+  seq_length ...................................... 16384
+  sequence_parallel ............................... True
   sgd_momentum .................................... 0.9
   shape_order ..................................... SBH
   short_seq_prob .................................. 0.1
@@ -470,7 +507,7 @@ using torch.bfloat16 for parameters ...
   swap_modules .................................... input_norm,self_attention,post_attention_norm
   swiglu .......................................... False
   swin_backbone_type .............................. tiny
-  tensor_model_parallel_size ...................... 1
+  tensor_model_parallel_size ...................... 2
   tensorboard_dir ................................. ./logs/test
   tensorboard_log_interval ........................ 1
   tensorboard_queue_size .......................... 1000
@@ -500,7 +537,7 @@ using torch.bfloat16 for parameters ...
   tp_y ............................................ 1
   train_data_path ................................. None
   train_iters ..................................... None
-  train_samples ................................... 36621093
+  train_samples ................................... 9155273
   train_sync_interval ............................. None
   transformer_impl ................................ local
   transformer_pipeline_model_parallel_size ........ 4
@@ -553,7 +590,7 @@ using torch.bfloat16 for parameters ...
   weight_decay .................................... 0.1
   weight_decay_incr_style ......................... constant
   wgrad_deferral_limit ............................ 0
-  world_size ...................................... 4
+  world_size ...................................... 8
   yaml_cfg ........................................ None
 -------------------- end of arguments ---------------------
 INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to constant 8
@@ -562,324 +599,476 @@ INFO:megatron.core.num_microbatches_calculator:setting number of microbatches to
 <frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
  > padded vocab (size: 32000) with 0 dummy tokens (new size: 32000)
 > initializing torch distributed ...
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
-<frozen importlib._bootstrap>:241: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
-> setting tensorboard ...
-WARNING: one_logger package is required to enable e2e metrics tracking. please go to https://confluence.nvidia.com/display/MLWFO/Package+Repositories for details to install it
-[W1121 11:57:02.564700366 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.566304413 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.588014427 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.600181274 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.601098237 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.601762700 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.602442053 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.603254876 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.603838468 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.604464340 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.605135513 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.605982096 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.606843180 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.607692033 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-[rank0]:[W1121 11:57:02.609416870 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
-> initialized tensor model parallel with size 1
+[W1125 15:10:01.895428959 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.897659348 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.911617683 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.924897615 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.926122440 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.926814212 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.927478865 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.928408629 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.928975131 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.929550803 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.930462337 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.931323290 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.932333454 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.933718290 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+[rank0]:[W1125 15:10:01.935861078 compiler_depend.ts:995] Warning: The watchdog timeout 600000ms(which is set by init_process_group) is less than or equal to HCCL execution timeout 1836000ms! The plog may not be recorded. (function ProcessGroupHCCL)
+> initialized tensor model parallel with size 2
 > initialized pipeline model parallel with size 4
 > setting random seeds to 1234 ...
 > compiling dataset index builder ...
 make: Entering directory '/data0/ssy/Megatron-LM-0.9.0/megatron/core/datasets'
 make: Nothing to be done for 'default'.
 make: Leaving directory '/data0/ssy/Megatron-LM-0.9.0/megatron/core/datasets'
->>> done with dataset index builder. Compilation time: 0.068 seconds
-[rank0]:[W1121 11:57:02.023506614 compiler_depend.ts:65] Warning: Warning: The torch.npu.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='npu') to create tensors. (function operator())
-time to initialize megatron (seconds): 17.966
-[after megatron is initialized] datetime: 2025-11-21 11:57:05 
+>>> done with dataset index builder. Compilation time: 0.056 seconds
+[rank0]:[W1125 15:10:01.371555226 compiler_depend.ts:65] Warning: Warning: The torch.npu.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='npu') to create tensors. (function operator())
+time to initialize megatron (seconds): 76.854
+[after megatron is initialized] datetime: 2025-11-25 15:10:04 
 building GPT model ...
- > number of parameters on (tensor, pipeline) model parallel rank (0, 1): 352415744
- > number of parameters on (tensor, pipeline) model parallel rank (0, 3): 483495936
- > number of parameters on (tensor, pipeline) model parallel rank (0, 2): 352415744
-INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
-Params for bucket 1 (352415744 elements):
-	module.decoder.layers.1.input_layernorm.weight
-	module.decoder.layers.0.mlp.linear_fc2.bias
-	module.decoder.layers.0.self_attention.linear_qkv.weight
-	module.decoder.layers.1.mlp.linear_fc2.weight
-	module.decoder.layers.0.mlp.linear_fc2.weight
-	module.decoder.layers.0.pre_mlp_layernorm.bias
-	module.decoder.layers.0.self_attention.linear_proj.weight
-	module.decoder.layers.1.mlp.linear_fc2.bias
-	module.decoder.layers.0.self_attention.linear_proj.bias
-	module.decoder.layers.1.pre_mlp_layernorm.bias
-	module.decoder.layers.1.self_attention.linear_qkv.bias
-	module.decoder.layers.1.self_attention.linear_proj.bias
-	module.decoder.layers.1.input_layernorm.bias
-	module.decoder.layers.0.mlp.linear_fc1.bias
-	module.decoder.layers.1.mlp.linear_fc1.bias
-	module.decoder.layers.0.input_layernorm.bias
-	module.decoder.layers.1.pre_mlp_layernorm.weight
-	module.decoder.layers.1.mlp.linear_fc1.weight
-	module.decoder.layers.1.self_attention.linear_qkv.weight
-	module.decoder.layers.0.mlp.linear_fc1.weight
-	module.decoder.layers.0.self_attention.linear_qkv.bias
-	module.decoder.layers.1.self_attention.linear_proj.weight
-	module.decoder.layers.0.pre_mlp_layernorm.weight
-	module.decoder.layers.0.input_layernorm.weight
+ > number of parameters on (tensor, pipeline) model parallel rank (1, 2): 176232448
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 3): 241776640
+ > number of parameters on (tensor, pipeline) model parallel rank (1, 3): 241776640
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 2): 176232448
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 1): 176232448
+ > number of parameters on (tensor, pipeline) model parallel rank (1, 1): 176232448
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
-Params for bucket 1 (352415744 elements):
-	module.decoder.layers.1.self_attention.linear_qkv.weight
-	module.decoder.layers.1.input_layernorm.weight
-	module.decoder.layers.0.mlp.linear_fc1.weight
+Params for bucket 1 (176232448 elements):
+	module.decoder.layers.0.mlp.linear_fc2.weight
 	module.decoder.layers.0.pre_mlp_layernorm.bias
-	module.decoder.layers.0.self_attention.linear_proj.bias
-	module.decoder.layers.0.input_layernorm.weight
-	module.decoder.layers.0.self_attention.linear_qkv.bias
-	module.decoder.layers.1.self_attention.linear_proj.weight
-	module.decoder.layers.0.mlp.linear_fc2.bias
-	module.decoder.layers.1.pre_mlp_layernorm.weight
-	module.decoder.layers.1.mlp.linear_fc2.bias
-	module.decoder.layers.1.mlp.linear_fc1.bias
-	module.decoder.layers.1.pre_mlp_layernorm.bias
-	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.1.input_layernorm.bias
 	module.decoder.layers.0.mlp.linear_fc1.bias
 	module.decoder.layers.0.self_attention.linear_qkv.weight
-	module.decoder.layers.0.self_attention.linear_proj.weight
-	module.decoder.layers.0.input_layernorm.bias
-	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.decoder.layers.1.mlp.linear_fc1.bias
 	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.1.input_layernorm.weight
 	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_proj.weight
 	module.decoder.layers.1.mlp.linear_fc2.weight
-	module.decoder.layers.1.input_layernorm.bias
-	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.0.mlp.linear_fc2.bias
+[DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
+[DEBUG] Optimizer class name: FusedTorchAdamW
+[DEBUG] Optimizer module: mindspeed.optimizer.adamw
+[DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
+[DEBUG] Optimizer class name: FusedTorchAdamW
+[DEBUG] Optimizer module: mindspeed.optimizer.adamw
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
-Params for bucket 1 (483495936 elements):
+Params for bucket 1 (241776640 elements):
+	module.decoder.layers.1.self_attention.linear_proj.weight
 	module.decoder.layers.1.input_layernorm.weight
-	module.decoder.layers.0.mlp.linear_fc1.bias
-	module.decoder.layers.1.mlp.linear_fc2.weight
-	module.decoder.layers.0.mlp.linear_fc2.weight
-	module.decoder.layers.1.mlp.linear_fc2.bias
-	module.decoder.layers.1.self_attention.linear_qkv.bias
-	module.decoder.layers.0.pre_mlp_layernorm.bias
-	module.output_layer.weight
-	module.decoder.layers.1.pre_mlp_layernorm.bias
-	module.decoder.layers.1.input_layernorm.bias
-	module.decoder.layers.0.input_layernorm.bias
 	module.decoder.final_layernorm.bias
-	module.decoder.layers.1.mlp.linear_fc1.weight
-	module.decoder.layers.1.self_attention.linear_proj.bias
-	module.decoder.layers.0.mlp.linear_fc1.weight
-	module.decoder.layers.0.self_attention.linear_qkv.weight
-	module.decoder.final_layernorm.weight
-	module.decoder.layers.1.mlp.linear_fc1.bias
-	module.decoder.layers.1.pre_mlp_layernorm.weight
-	module.decoder.layers.1.self_attention.linear_qkv.weight
-	module.decoder.layers.0.mlp.linear_fc2.bias
-	module.decoder.layers.0.self_attention.linear_qkv.bias
-	module.decoder.layers.0.self_attention.linear_proj.bias
-	module.decoder.layers.0.input_layernorm.weight
-	module.decoder.layers.1.self_attention.linear_proj.weight
 	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.final_layernorm.weight
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
 	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.output_layer.weight
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.0.input_layernorm.weight
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
- > number of parameters on (tensor, pipeline) model parallel rank (0, 0): 500264960
+INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
+Params for bucket 1 (176232448 elements):
+	module.decoder.layers.1.self_attention.linear_qkv.weight
+	module.decoder.layers.0.mlp.linear_fc1.bias
+	module.decoder.layers.0.input_layernorm.weight
+	module.decoder.layers.1.self_attention.linear_proj.bias
+	module.decoder.layers.0.mlp.linear_fc2.bias
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.1.input_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.decoder.layers.1.mlp.linear_fc2.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
+	module.decoder.layers.1.mlp.linear_fc1.bias
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.self_attention.linear_qkv.bias
+	module.decoder.layers.1.self_attention.linear_proj.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc1.weight
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+[DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
+[DEBUG] Optimizer class name: FusedTorchAdamW
+[DEBUG] Optimizer module: mindspeed.optimizer.adamw
+ > number of parameters on (tensor, pipeline) model parallel rank (0, 0): 308877312
+ > number of parameters on (tensor, pipeline) model parallel rank (1, 0): 308877312
 INFO:megatron.core.distributed.distributed_data_parallel:Setting up DistributedDataParallel with config DistributedDataParallelConfig(grad_reduce_in_fp32=True, overlap_grad_reduce=False, overlap_param_gather=False, align_param_gather=False, use_distributed_optimizer=True, check_for_nan_in_grad=True, bucket_size=None, average_in_collective=False, fp8_param_gather=False)
 INFO:megatron.core.distributed.param_and_grad_buffer:Number of buckets for gradient all-reduce / reduce-scatter: 1
-Params for bucket 1 (500264960 elements):
-	module.decoder.layers.1.pre_mlp_layernorm.bias
-	module.decoder.layers.1.input_layernorm.weight
-	module.decoder.layers.0.self_attention.linear_proj.bias
+Params for bucket 1 (308877312 elements):
+	module.decoder.layers.1.mlp.linear_fc2.bias
 	module.decoder.layers.1.mlp.linear_fc1.bias
 	module.decoder.layers.1.self_attention.linear_qkv.bias
-	module.decoder.layers.0.mlp.linear_fc2.weight
-	module.decoder.layers.0.self_attention.linear_qkv.bias
-	module.embedding.position_embeddings.weight
-	module.decoder.layers.1.pre_mlp_layernorm.weight
+	module.decoder.layers.0.input_layernorm.weight
 	module.decoder.layers.1.self_attention.linear_proj.bias
-	module.decoder.layers.0.self_attention.linear_qkv.weight
-	module.decoder.layers.0.input_layernorm.bias
-	module.decoder.layers.0.pre_mlp_layernorm.bias
-	module.decoder.layers.0.pre_mlp_layernorm.weight
-	module.decoder.layers.1.mlp.linear_fc2.bias
-	module.decoder.layers.1.mlp.linear_fc2.weight
+	module.decoder.layers.1.input_layernorm.weight
 	module.decoder.layers.1.mlp.linear_fc1.weight
+	module.decoder.layers.1.mlp.linear_fc2.weight
 	module.decoder.layers.1.self_attention.linear_qkv.weight
-	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.self_attention.linear_qkv.weight
+	module.decoder.layers.1.pre_mlp_layernorm.weight
 	module.decoder.layers.0.mlp.linear_fc2.bias
-	module.embedding.word_embeddings.weight
+	module.decoder.layers.0.mlp.linear_fc2.weight
+	module.decoder.layers.0.pre_mlp_layernorm.bias
+	module.decoder.layers.0.self_attention.linear_proj.weight
+	module.decoder.layers.0.input_layernorm.bias
+	module.decoder.layers.0.self_attention.linear_qkv.bias
+	module.decoder.layers.1.pre_mlp_layernorm.bias
 	module.decoder.layers.1.self_attention.linear_proj.weight
 	module.decoder.layers.0.mlp.linear_fc1.bias
 	module.decoder.layers.0.mlp.linear_fc1.weight
-	module.decoder.layers.0.self_attention.linear_proj.weight
-	module.decoder.layers.0.input_layernorm.weight
-INFO:megatron.core.optimizer:Setting up optimizer with config OptimizerConfig(optimizer='adam', lr=6e-05, min_lr=6e-06, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, fp16=False, bf16=True, params_dtype=torch.bfloat16, loss_scale=None, initial_loss_scale=65536.0, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.95, adam_eps=1e-08, sgd_momentum=0.9, use_distributed_optimizer=True, overlap_grad_reduce=False, overlap_param_gather=False, overlap_param_gather_with_optimizer_step=False, clip_grad=8.0, log_num_zeros_in_grad=False, barrier_with_L1_time=False, timers=<megatron.core.timers.Timers object at 0xfffee1eb16c0>, config_logger_dir='')
+	module.embedding.word_embeddings.weight
+	module.decoder.layers.1.input_layernorm.bias
+	module.decoder.layers.0.pre_mlp_layernorm.weight
+	module.decoder.layers.0.self_attention.linear_proj.bias
+	module.embedding.position_embeddings.weight
+INFO:megatron.core.optimizer:Setting up optimizer with config OptimizerConfig(optimizer='adam', lr=6e-05, min_lr=6e-06, decoupled_lr=None, decoupled_min_lr=None, weight_decay=0.1, fp16=False, bf16=True, params_dtype=torch.bfloat16, loss_scale=None, initial_loss_scale=65536.0, min_loss_scale=1.0, loss_scale_window=1000, hysteresis=2, adam_beta1=0.9, adam_beta2=0.95, adam_eps=1e-08, sgd_momentum=0.9, use_distributed_optimizer=True, overlap_grad_reduce=False, overlap_param_gather=False, overlap_param_gather_with_optimizer_step=False, clip_grad=8.0, log_num_zeros_in_grad=False, barrier_with_L1_time=False, timers=<megatron.core.timers.Timers object at 0xfffef10157b0>, config_logger_dir='')
 [DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
 [DEBUG] Optimizer class name: FusedTorchAdamW
 [DEBUG] Optimizer module: mindspeed.optimizer.adamw
-setting training iterations to 4577636
+setting training iterations to 1144409
 INFO:megatron.core.optimizer_param_scheduler:> learning rate decay style: cosine
-[after model, optimizer, and learning rate scheduler are built] datetime: 2025-11-21 11:57:06 
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168137 is still running
+[DEBUG] Optimizer type: <class 'mindspeed.optimizer.adamw.FusedTorchAdamW'>
+[DEBUG] Optimizer class name: FusedTorchAdamW
+[DEBUG] Optimizer module: mindspeed.optimizer.adamw
+[after model, optimizer, and learning rate scheduler are built] datetime: 2025-11-25 15:10:08 
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605783 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168139 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605785 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168138 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605784 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168140 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605786 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605787 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605788 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605789 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 605790 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=105 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168216 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606025 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168237 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606071 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168259 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606149 is still running
   _warn("subprocess %s is still running" % self.pid,
 /data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
   _cleanup()
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168268 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606225 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168304 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
+  _cleanup()
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606262 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168326 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
+  _cleanup()
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606301 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168348 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
+  _cleanup()
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606353 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168360 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
+  _cleanup()
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606363 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168490 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606470 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168512 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606482 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168526 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606514 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168555 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606536 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168583 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606549 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168605 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606571 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168644 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606602 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168673 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606612 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168854 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606648 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168876 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606670 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168898 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606682 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168910 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606714 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168942 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606727 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168964 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606748 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168986 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606775 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2168998 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606788 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169030 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606824 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169052 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606846 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169074 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606868 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169086 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606890 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169118 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606903 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169119 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606934 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169120 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606947 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169124 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 606964 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169125 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607000 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169127 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607022 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169126 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607044 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169128 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607066 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169129 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607081 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169131 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607110 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169130 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607132 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169133 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607140 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169132 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607176 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169135 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607198 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169134 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607222 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169137 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607244 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169138 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607281 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169139 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607359 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169145 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607439 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169147 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607441 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169150 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607468 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607558 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607580 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607602 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607624 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607646 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607668 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607669 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607671 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607673 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607677 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607680 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607684 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607691 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607692 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607698 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607703 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607711 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607717 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607723 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607729 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607730 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607731 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607732 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607733 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607734 is still running
   _warn("subprocess %s is still running" % self.pid,
 Bind cpu successful!!!
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169151 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607738 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169152 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607739 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169153 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607740 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169154 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607741 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169155 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607742 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169156 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607743 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169157 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607744 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169158 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607745 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169160 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607746 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169159 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607785 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169161 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607802 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169162 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607819 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169163 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607836 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169164 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607857 is still running
   _warn("subprocess %s is still running" % self.pid,
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 2169165 is still running
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607860 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607875 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607876 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607893 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607892 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607911 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607913 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607914 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607930 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607932 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607933 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607949 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607951 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607966 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607969 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607984 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 607986 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608002 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608004 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608019 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608035 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608052 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608083 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608101 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608107 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608120 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608123 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608136 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608139 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608152 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608155 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608157 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608158 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608159 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608160 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608161 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608162 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608163 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608164 is still running
+  _warn("subprocess %s is still running" % self.pid,
+/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:1067: ResourceWarning: subprocess 608165 is still running
   _warn("subprocess %s is still running" % self.pid,
 > building train, validation, and test datasets ...
  > datasets target sizes (minimum size):
-    train:      36621093
-    validation: 146560
+    train:      9155273
+    validation: 36800
     test:       320
 INFO:megatron.core.datasets.blended_megatron_dataset_config:Let split_matrix = [(0, 0.98), (0.98, 1.0), None]
 > building train, validation, and test datasets for GPT ...
-INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building dataset splits with cls=GPTDataset, sizes=(36621093, 146560, 320), and config=GPTDatasetConfig(random_seed=1234, sequence_length=4096, blend=(['/tmp/zb_sample_dataset/dataset/c4_text_document'], None), blend_per_split=[None, None, None], renormalize_blend_weights=False, split='98,2,0', split_matrix=[(0, 0.98), (0.98, 1.0), None], num_dataset_builder_threads=1, path_to_cache=None, mmap_bin_files=True, mock=False, tokenizer=<megatron.training.tokenizer.tokenizer._GPTSentencePieceTokenizer object at 0xfffee1eb2320>, reset_position_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=False, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, s3_cache_path=None)
+INFO:megatron.core.datasets.blended_megatron_dataset_builder:Building dataset splits with cls=GPTDataset, sizes=(9155273, 36800, 320), and config=GPTDatasetConfig(random_seed=1234, sequence_length=16384, blend=(['/tmp/zb_sample_dataset/dataset/c4_text_document'], None), blend_per_split=[None, None, None], renormalize_blend_weights=False, split='98,2,0', split_matrix=[(0, 0.98), (0.98, 1.0), None], num_dataset_builder_threads=1, path_to_cache=None, mmap_bin_files=True, mock=False, tokenizer=<megatron.training.tokenizer.tokenizer._GPTSentencePieceTokenizer object at 0xfffef1016380>, reset_position_ids=False, reset_attention_mask=False, eod_mask_loss=False, create_attention_mask=False, drop_last_partial_validation_sequence=True, add_extra_token_to_sequence=True, s3_cache_path=None)
 INFO:megatron.core.datasets.indexed_dataset:Load the _IndexReader from /tmp/zb_sample_dataset/dataset/c4_text_document.idx
 INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence lengths
 INFO:megatron.core.datasets.indexed_dataset:	Extract the sequence pointers
@@ -887,328 +1076,226 @@ INFO:megatron.core.datasets.indexed_dataset:	Extract the document indices
 INFO:megatron.core.datasets.indexed_dataset:> total number of sequences: 269528
 INFO:megatron.core.datasets.indexed_dataset:> total number of documents: 269528
 INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset train indices
-INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 57f0ebe96ac303d0dc22ef031026e641-GPTDataset-train-document_index.npy
-INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 57f0ebe96ac303d0dc22ef031026e641-GPTDataset-train-sample_index.npy
-INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 57f0ebe96ac303d0dc22ef031026e641-GPTDataset-train-shuffle_index.npy
-INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 36651885
+INFO:megatron.core.datasets.gpt_dataset:	Load the document index from fd70713d65957506401a23714573d15b-GPTDataset-train-document_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from fd70713d65957506401a23714573d15b-GPTDataset-train-sample_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from fd70713d65957506401a23714573d15b-GPTDataset-train-shuffle_index.npy
+INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 9162971
 INFO:megatron.core.datasets.gpt_dataset:Load the GPTDataset valid indices
-INFO:megatron.core.datasets.gpt_dataset:	Load the document index from 375560d5be3ad664e8b59560350768bb-GPTDataset-valid-document_index.npy
-INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from 375560d5be3ad664e8b59560350768bb-GPTDataset-valid-sample_index.npy
-INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from 375560d5be3ad664e8b59560350768bb-GPTDataset-valid-shuffle_index.npy
-INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 147111
+INFO:megatron.core.datasets.gpt_dataset:	Load the document index from c4b117f1bac1d15e1785b6c57ca8f8ae-GPTDataset-valid-document_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the sample index from c4b117f1bac1d15e1785b6c57ca8f8ae-GPTDataset-valid-sample_index.npy
+INFO:megatron.core.datasets.gpt_dataset:	Load the shuffle index from c4b117f1bac1d15e1785b6c57ca8f8ae-GPTDataset-valid-shuffle_index.npy
+INFO:megatron.core.datasets.gpt_dataset:> total number of samples: 36998
 > finished creating GPT datasets ...
-[after dataloaders are built] datetime: 2025-11-21 11:57:12 
+[after dataloaders are built] datetime: 2025-11-25 15:10:14 
 done with setup ...
-training ...
 (min, max) time across ranks (ms):
-    model-and-optimizer-setup ......................: (116.01, 861.60)
-    train/valid/test-data-iterators-setup ..........: (16.38, 453.13)
-[before the start of training step] datetime: 2025-11-21 11:57:13 
-[2025-11-21 11:57:13] [WARNING] [2166818] profiler.py: Invalid parameter export_type: None, reset it to text.
-[2025-11-21 11:57:13] [WARNING] [2166818] profiler.py: Invalid parameter export_type: None, reset it to text.
+    model-and-optimizer-setup ......................: (95.97, 3239.10)
+    train/valid/test-data-iterators-setup ..........: (22.49, 332.67)
+training ...
+[before the start of training step] datetime: 2025-11-25 15:10:17 
+[2025-11-25 15:10:17] [WARNING] [602674] profiler.py: Invalid parameter export_type: None, reset it to text.
+[2025-11-25 15:10:17] [WARNING] [602674] profiler.py: Invalid parameter export_type: None, reset it to text.
 ========== now is iteration 1 ==========
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:165: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:166: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
   storage_ptr = tensor.storage().data_ptr()
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
 /data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
   warnings.warn("Flash Attention is highly recommended")
-rank 0 before allocation rss 1903.095808 MB
+/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:166: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  storage_ptr = tensor.storage().data_ptr()
 /data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
   warnings.warn(
 /data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
   warnings.warn("Flash Attention is highly recommended")
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:24: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-/data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
-  warnings.warn("Flash Attention is highly recommended")
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:24: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-/data0/ssy/MindSpeed/mindspeed/model/transformer.py:573: UserWarning: Flash Attention is highly recommended
-  warnings.warn("Flash Attention is highly recommended")
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/offload.py:24: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  return x.storage().data_ptr() == y.storage().data_ptr() and x.storage_offset() == y.storage_offset() and x.numel() == y.numel()
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 D2H带宽: 26.13 GB/s (3.416 GB / 130.73 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 before allocation rss 2013.212672 MB
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 D2H带宽: 18.95 GB/s (3.416 GB / 180.28 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 before allocation rss 2013.589504 MB
-rank 0 before allocation rss 2013.85984 MB
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>
-  _cleanup()
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 D2H带宽: 18.21 GB/s (3.416 GB / 187.57 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 18.19 GB/s (3.416 GB / 187.80 ms), offload 默认流等待H2D时间: 0.08 ms
-Using /root/.cache/torch_extensions/py310_cpu as PyTorch extensions root...
-/data0/ssy/condaEnv/megatron/lib/python3.10/subprocess.py:762: ResourceWarning: unclosed file <_io.TextIOWrapper name=105 encoding='UTF-8'>
-  _cleanup()
-Emitting ninja build file /root/.cache/torch_extensions/py310_cpu/npu_matmul_add_fp32/build.ninja...
-Building extension module npu_matmul_add_fp32...
-Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
-ninja: no work to do.
-Loading extension module npu_matmul_add_fp32...
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 D2H带宽: 20.64 GB/s (3.416 GB / 165.54 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 24.93 GB/s (3.416 GB / 137.07 ms), offload 默认流等待H2D时间: 0.12 ms
-rank 0 D2H带宽: 20.80 GB/s (3.416 GB / 164.22 ms), 默认流等待D2H时间: 42.87 ms
-rank 0 H2D带宽: 20.41 GB/s (3.416 GB / 167.36 ms), offload 默认流等待H2D时间: 1.15 ms
-rank 0 D2H带宽: 20.38 GB/s (3.416 GB / 167.66 ms), 默认流等待D2H时间: 44.44 ms
-rank 0 H2D带宽: 20.35 GB/s (3.416 GB / 167.89 ms), offload 默认流等待H2D时间: 5.31 ms
-rank 0 D2H带宽: 20.41 GB/s (3.416 GB / 167.41 ms), 默认流等待D2H时间: 44.09 ms
-rank 0 H2D带宽: 20.39 GB/s (3.416 GB / 167.52 ms), offload 默认流等待H2D时间: 5.67 ms
-rank 0 D2H带宽: 21.14 GB/s (3.416 GB / 161.59 ms), 默认流等待D2H时间: 81.68 ms
-rank 0 H2D带宽: 21.30 GB/s (3.416 GB / 160.38 ms), offload 默认流等待H2D时间: 4.93 ms
-rank 3 activation memory used is 6228.12060546875 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.32 ms), offload 默认流等待H2D时间: 65.74 ms
-rank 2 activation memory used is 9564.26025390625 MB
-rank 0 H2D带宽: 25.08 GB/s (3.416 GB / 136.21 ms), offload 默认流等待H2D时间: 65.27 ms
-rank 1 activation memory used is 12868.404296875 MB
-rank 0 activation memory used is 13964.599609375 MB
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-========== now is iteration 2 ==========
-/data0/ssy/Megatron-LM-0.9.0/megatron/core/tensor_parallel/layers.py:611: UserWarning: async_grad_allreduce is deprecated, not in use anymore and will be fully removed with 0.10.0. Please use allreduce_dgrad instead.
-  warnings.warn(
-rank 0 D2H带宽: 19.10 GB/s (3.416 GB / 178.88 ms), 默认流等待D2H时间: 132.98 ms
-rank 0 D2H带宽: 19.65 GB/s (3.416 GB / 173.86 ms), 默认流等待D2H时间: 123.36 ms
-rank 0 D2H带宽: 20.13 GB/s (3.416 GB / 169.71 ms), 默认流等待D2H时间: 113.15 ms
-rank 0 H2D带宽: 20.18 GB/s (3.416 GB / 169.32 ms), offload 默认流等待H2D时间: 0.15 ms
-rank 0 D2H带宽: 20.20 GB/s (3.416 GB / 169.15 ms), 默认流等待D2H时间: 48.54 ms
-rank 0 H2D带宽: 20.12 GB/s (3.416 GB / 169.80 ms), offload 默认流等待H2D时间: 2.89 ms
-rank 0 D2H带宽: 20.20 GB/s (3.416 GB / 169.12 ms), 默认流等待D2H时间: 47.99 ms
-rank 0 H2D带宽: 20.16 GB/s (3.416 GB / 169.49 ms), offload 默认流等待H2D时间: 3.37 ms
-rank 0 D2H带宽: 19.67 GB/s (3.416 GB / 173.66 ms), 默认流等待D2H时间: 52.43 ms
-rank 0 H2D带宽: 19.66 GB/s (3.416 GB / 173.73 ms), offload 默认流等待H2D时间: 3.46 ms
-rank 0 D2H带宽: 19.39 GB/s (3.416 GB / 176.21 ms), 默认流等待D2H时间: 55.12 ms
-rank 0 H2D带宽: 19.39 GB/s (3.416 GB / 176.18 ms), offload 默认流等待H2D时间: 3.22 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 0 D2H带宽: 19.95 GB/s (3.416 GB / 171.26 ms), 默认流等待D2H时间: 93.77 ms
-rank 0 H2D带宽: 20.04 GB/s (3.416 GB / 170.48 ms), offload 默认流等待H2D时间: 3.56 ms
-rank 2 activation memory used is 8460.25927734375 MB
-rank 0 H2D带宽: 25.07 GB/s (3.416 GB / 136.26 ms), offload 默认流等待H2D时间: 65.62 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.11 GB/s (3.416 GB / 136.05 ms), offload 默认流等待H2D时间: 65.00 ms
-rank 0 activation memory used is 12924.59912109375 MB
-========== now is iteration 3 ==========
-rank 0 D2H带宽: 22.86 GB/s (3.416 GB / 149.48 ms), 默认流等待D2H时间: 103.63 ms
-rank 0 D2H带宽: 19.93 GB/s (3.416 GB / 171.45 ms), 默认流等待D2H时间: 121.23 ms
-rank 0 D2H带宽: 20.30 GB/s (3.416 GB / 168.26 ms), 默认流等待D2H时间: 114.35 ms
-rank 0 H2D带宽: 20.32 GB/s (3.416 GB / 168.14 ms), offload 默认流等待H2D时间: 0.08 ms
-rank 0 D2H带宽: 19.83 GB/s (3.416 GB / 172.30 ms), 默认流等待D2H时间: 53.43 ms
-rank 0 H2D带宽: 19.66 GB/s (3.416 GB / 173.81 ms), offload 默认流等待H2D时间: 1.07 ms
-rank 0 D2H带宽: 19.62 GB/s (3.416 GB / 174.09 ms), 默认流等待D2H时间: 54.94 ms
-rank 0 H2D带宽: 19.61 GB/s (3.416 GB / 174.25 ms), offload 默认流等待H2D时间: 1.31 ms
-rank 0 D2H带宽: 19.81 GB/s (3.416 GB / 172.46 ms), 默认流等待D2H时间: 52.71 ms
-rank 0 H2D带宽: 19.79 GB/s (3.416 GB / 172.67 ms), offload 默认流等待H2D时间: 1.13 ms
-rank 0 D2H带宽: 19.89 GB/s (3.416 GB / 171.75 ms), 默认流等待D2H时间: 52.08 ms
-rank 0 H2D带宽: 19.87 GB/s (3.416 GB / 171.93 ms), offload 默认流等待H2D时间: 1.46 ms
-rank 0 D2H带宽: 20.60 GB/s (3.416 GB / 165.84 ms), 默认流等待D2H时间: 89.37 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 0 H2D带宽: 20.68 GB/s (3.416 GB / 165.17 ms), offload 默认流等待H2D时间: 2.35 ms
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.05 GB/s (3.416 GB / 136.39 ms), offload 默认流等待H2D时间: 65.85 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.04 GB/s (3.416 GB / 136.41 ms), offload 默认流等待H2D时间: 65.42 ms
-rank 0 activation memory used is 12924.59716796875 MB
-========== now is iteration 4 ==========
-[rank1]:[W1121 11:57:26.804819624 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
-[rank0]:[W1121 11:57:26.837843942 CPUAllocator.cpp:245] Memory block of unknown size was allocated before the profiling started, profiler results will not include the deallocation event
-rank 0 D2H带宽: 24.62 GB/s (3.416 GB / 138.75 ms), 默认流等待D2H时间: 0.06 ms
-rank 0 D2H带宽: 28.16 GB/s (3.416 GB / 121.31 ms), 默认流等待D2H时间: 0.43 ms
-rank 0 D2H带宽: 19.61 GB/s (3.416 GB / 174.21 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.90 GB/s (3.416 GB / 171.68 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 21.43 GB/s (3.416 GB / 159.39 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 20.83 GB/s (3.416 GB / 164.05 ms), offload 默认流等待H2D时间: 1.48 ms
-rank 0 D2H带宽: 17.63 GB/s (3.416 GB / 193.80 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.88 GB/s (3.416 GB / 171.86 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 18.93 GB/s (3.416 GB / 180.50 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.80 GB/s (3.416 GB / 172.54 ms), offload 默认流等待H2D时间: 2.40 ms
-rank 0 D2H带宽: 18.95 GB/s (3.416 GB / 180.28 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 20.25 GB/s (3.416 GB / 168.68 ms), offload 默认流等待H2D时间: 1.03 ms
-rank 0 D2H带宽: 19.19 GB/s (3.416 GB / 178.00 ms), 默认流等待D2H时间: 49.54 ms
-rank 0 H2D带宽: 20.13 GB/s (3.416 GB / 169.68 ms), offload 默认流等待H2D时间: 21.84 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.03 GB/s (3.416 GB / 136.51 ms), offload 默认流等待H2D时间: 64.69 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.31 ms), offload 默认流等待H2D时间: 63.98 ms
-rank 0 activation memory used is 12924.59716796875 MB
-========== now is iteration 5 ==========
-rank 0 D2H带宽: 24.81 GB/s (3.416 GB / 137.72 ms), 默认流等待D2H时间: 0.04 ms
-rank 0 D2H带宽: 23.31 GB/s (3.416 GB / 146.55 ms), 默认流等待D2H时间: 0.04 ms
-rank 0 D2H带宽: 19.79 GB/s (3.416 GB / 172.66 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.52 GB/s (3.416 GB / 174.98 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 17.58 GB/s (3.416 GB / 194.38 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 17.90 GB/s (3.416 GB / 190.87 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 17.65 GB/s (3.416 GB / 193.60 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.52 GB/s (3.416 GB / 174.99 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 17.81 GB/s (3.416 GB / 191.81 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 19.80 GB/s (3.416 GB / 172.51 ms), offload 默认流等待H2D时间: 0.00 ms
-rank 0 D2H带宽: 17.00 GB/s (3.416 GB / 200.99 ms), 默认流等待D2H时间: 0.00 ms
-rank 0 H2D带宽: 16.95 GB/s (3.416 GB / 201.56 ms), offload 默认流等待H2D时间: 1.03 ms
-rank 0 D2H带宽: 17.80 GB/s (3.416 GB / 191.92 ms), 默认流等待D2H时间: 64.91 ms
-rank 0 H2D带宽: 20.20 GB/s (3.416 GB / 169.17 ms), offload 默认流等待H2D时间: 6.63 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.04 GB/s (3.416 GB / 136.46 ms), offload 默认流等待H2D时间: 64.49 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.03 GB/s (3.416 GB / 136.48 ms), offload 默认流等待H2D时间: 64.34 ms
-rank 0 activation memory used is 12924.59716796875 MB
-[2025-11-21 11:57:31] [WARNING] [2166818] profiler.py: Stop profiler while current state is RECORD_AND_SAVE, perhaps the scheduling cycle has not yet completed.
-[2025-11-21 11:57:31] [INFO] [2172322] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_2166819_20251121035722667_ascend_pt
-|[2025-11-21 11:57:31] [INFO] [2172364] profiler.py: Start parsing profiling data: /data0/ssy/Megatron-LM-0.9.0/logs/test/node02_2166818_20251121035722669_ascend_pt
-|//--\\||/-[2025-11-21 11:57:38] [INFO] [2172406] profiler.py: CANN profiling data parsed in a total time of 0:00:06.030802
-/\[2025-11-21 11:57:39] [INFO] [2172429] profiler.py: CANN profiling data parsed in a total time of 0:00:07.029264
--|\/|-/\-|[2025-11-21 11:57:44] [INFO] [2172322] profiler.py: All profiling data parsed in a total time of 0:00:12.534808
-\|/-\|/-\|/-\|/-\|/-\|/-\|[2025-11-21 11:58:09] [INFO] [2172364] profiler.py: All profiling data parsed in a total time of 0:00:38.122043
-[2025-11-21 11:58:10] [WARNING] [2166818] profiler.py: Profiler is stopped, step takes no effect!
-========== now is iteration 6 ==========
-rank 0 D2H带宽: 18.09 GB/s (3.416 GB / 188.87 ms), 默认流等待D2H时间: 143.12 ms
-rank 0 D2H带宽: 17.74 GB/s (3.416 GB / 192.55 ms), 默认流等待D2H时间: 141.67 ms
-rank 0 D2H带宽: 21.35 GB/s (3.416 GB / 159.99 ms), 默认流等待D2H时间: 106.33 ms
-rank 0 H2D带宽: 20.54 GB/s (3.416 GB / 166.32 ms), offload 默认流等待H2D时间: 6.12 ms
-rank 0 D2H带宽: 20.72 GB/s (3.416 GB / 164.88 ms), 默认流等待D2H时间: 40.09 ms
-rank 0 H2D带宽: 20.68 GB/s (3.416 GB / 165.22 ms), offload 默认流等待H2D时间: 6.85 ms
-rank 0 D2H带宽: 20.01 GB/s (3.416 GB / 170.77 ms), 默认流等待D2H时间: 46.46 ms
-rank 0 H2D带宽: 20.01 GB/s (3.416 GB / 170.72 ms), offload 默认流等待H2D时间: 6.34 ms
-rank 0 D2H带宽: 20.36 GB/s (3.416 GB / 167.84 ms), 默认流等待D2H时间: 42.89 ms
-rank 0 H2D带宽: 20.24 GB/s (3.416 GB / 168.78 ms), offload 默认流等待H2D时间: 7.62 ms
-rank 0 D2H带宽: 19.67 GB/s (3.416 GB / 173.68 ms), 默认流等待D2H时间: 48.46 ms
-rank 0 H2D带宽: 19.71 GB/s (3.416 GB / 173.30 ms), offload 默认流等待H2D时间: 7.07 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 0 D2H带宽: 20.29 GB/s (3.416 GB / 168.39 ms), 默认流等待D2H时间: 86.74 ms
-rank 0 H2D带宽: 20.48 GB/s (3.416 GB / 166.83 ms), offload 默认流等待H2D时间: 6.90 ms
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.32 ms), offload 默认流等待H2D时间: 65.69 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.09 GB/s (3.416 GB / 136.17 ms), offload 默认流等待H2D时间: 65.37 ms
-rank 0 activation memory used is 12924.59716796875 MB
-[2025-11-21 11:58:12] [WARNING] [2166818] profiler.py: Profiler is stopped, step takes no effect!
-========== now is iteration 7 ==========
-rank 0 D2H带宽: 22.16 GB/s (3.416 GB / 154.17 ms), 默认流等待D2H时间: 108.25 ms
-rank 0 D2H带宽: 25.14 GB/s (3.416 GB / 135.90 ms), 默认流等待D2H时间: 86.59 ms
-rank 0 D2H带宽: 20.84 GB/s (3.416 GB / 163.92 ms), 默认流等待D2H时间: 109.22 ms
-rank 0 H2D带宽: 20.83 GB/s (3.416 GB / 163.99 ms), offload 默认流等待H2D时间: 0.08 ms
-rank 0 D2H带宽: 19.59 GB/s (3.416 GB / 174.42 ms), 默认流等待D2H时间: 56.03 ms
-rank 0 H2D带宽: 19.49 GB/s (3.416 GB / 175.26 ms), offload 默认流等待H2D时间: 0.81 ms
-rank 0 D2H带宽: 20.11 GB/s (3.416 GB / 169.88 ms), 默认流等待D2H时间: 51.18 ms
-rank 0 H2D带宽: 20.09 GB/s (3.416 GB / 170.02 ms), offload 默认流等待H2D时间: 0.90 ms
-rank 0 D2H带宽: 20.10 GB/s (3.416 GB / 170.01 ms), 默认流等待D2H时间: 50.72 ms
-rank 0 H2D带宽: 20.00 GB/s (3.416 GB / 170.79 ms), offload 默认流等待H2D时间: 1.69 ms
-rank 0 D2H带宽: 20.30 GB/s (3.416 GB / 168.29 ms), 默认流等待D2H时间: 48.84 ms
-rank 0 H2D带宽: 20.35 GB/s (3.416 GB / 167.90 ms), offload 默认流等待H2D时间: 1.41 ms
-rank 0 D2H带宽: 20.69 GB/s (3.416 GB / 165.09 ms), 默认流等待D2H时间: 89.64 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 0 H2D带宽: 20.78 GB/s (3.416 GB / 164.43 ms), offload 默认流等待H2D时间: 1.92 ms
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.05 GB/s (3.416 GB / 136.36 ms), offload 默认流等待H2D时间: 65.79 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.04 GB/s (3.416 GB / 136.44 ms), offload 默认流等待H2D时间: 65.65 ms
-rank 0 activation memory used is 12924.59716796875 MB
-[2025-11-21 11:58:14] [WARNING] [2166818] profiler.py: Profiler is stopped, step takes no effect!
-========== now is iteration 8 ==========
-rank 0 D2H带宽: 28.40 GB/s (3.416 GB / 120.30 ms), 默认流等待D2H时间: 74.36 ms
-rank 0 D2H带宽: 25.17 GB/s (3.416 GB / 135.74 ms), 默认流等待D2H时间: 85.16 ms
-rank 0 D2H带宽: 20.37 GB/s (3.416 GB / 167.73 ms), 默认流等待D2H时间: 83.32 ms
-rank 0 H2D带宽: 20.34 GB/s (3.416 GB / 168.00 ms), offload 默认流等待H2D时间: 0.08 ms
-rank 0 D2H带宽: 20.41 GB/s (3.416 GB / 167.37 ms), 默认流等待D2H时间: 48.68 ms
-rank 0 H2D带宽: 20.33 GB/s (3.416 GB / 168.05 ms), offload 默认流等待H2D时间: 0.90 ms
-rank 0 D2H带宽: 20.61 GB/s (3.416 GB / 165.75 ms), 默认流等待D2H时间: 47.19 ms
-rank 0 H2D带宽: 20.59 GB/s (3.416 GB / 165.94 ms), offload 默认流等待H2D时间: 0.99 ms
-rank 0 D2H带宽: 20.25 GB/s (3.416 GB / 168.71 ms), 默认流等待D2H时间: 49.76 ms
-rank 0 H2D带宽: 20.24 GB/s (3.416 GB / 168.83 ms), offload 默认流等待H2D时间: 0.78 ms
-rank 0 D2H带宽: 19.33 GB/s (3.416 GB / 176.76 ms), 默认流等待D2H时间: 58.25 ms
-rank 0 H2D带宽: 19.32 GB/s (3.416 GB / 176.88 ms), offload 默认流等待H2D时间: 1.27 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 0 D2H带宽: 21.43 GB/s (3.416 GB / 159.39 ms), 默认流等待D2H时间: 41.98 ms
-rank 0 H2D带宽: 17.75 GB/s (3.416 GB / 192.43 ms), offload 默认流等待H2D时间: 35.49 ms
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.05 GB/s (3.416 GB / 136.37 ms), offload 默认流等待H2D时间: 65.96 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.08 GB/s (3.416 GB / 136.20 ms), offload 默认流等待H2D时间: 65.44 ms
-rank 0 activation memory used is 12924.59716796875 MB
-[2025-11-21 11:58:16] [WARNING] [2166818] profiler.py: Profiler is stopped, step takes no effect!
-========== now is iteration 9 ==========
-rank 0 D2H带宽: 20.00 GB/s (3.416 GB / 170.85 ms), 默认流等待D2H时间: 124.93 ms
-rank 0 D2H带宽: 28.13 GB/s (3.416 GB / 121.44 ms), 默认流等待D2H时间: 72.07 ms
-rank 0 D2H带宽: 21.00 GB/s (3.416 GB / 162.71 ms), 默认流等待D2H时间: 108.59 ms
-rank 0 H2D带宽: 20.17 GB/s (3.416 GB / 169.38 ms), offload 默认流等待H2D时间: 6.68 ms
-rank 0 D2H带宽: 19.76 GB/s (3.416 GB / 172.87 ms), 默认流等待D2H时间: 48.49 ms
-rank 0 H2D带宽: 19.76 GB/s (3.416 GB / 172.93 ms), offload 默认流等待H2D时间: 6.67 ms
-rank 0 D2H带宽: 19.91 GB/s (3.416 GB / 171.60 ms), 默认流等待D2H时间: 47.70 ms
-rank 0 H2D带宽: 19.88 GB/s (3.416 GB / 171.84 ms), offload 默认流等待H2D时间: 6.40 ms
-rank 0 D2H带宽: 21.16 GB/s (3.416 GB / 161.44 ms), 默认流等待D2H时间: 3.99 ms
-rank 0 H2D带宽: 18.60 GB/s (3.416 GB / 183.68 ms), offload 默认流等待H2D时间: 28.80 ms
-rank 0 D2H带宽: 20.97 GB/s (3.416 GB / 162.93 ms), 默认流等待D2H时间: 15.89 ms
-rank 0 H2D带宽: 21.00 GB/s (3.416 GB / 162.68 ms), offload 默认流等待H2D时间: 28.65 ms
-rank 0 D2H带宽: 21.28 GB/s (3.416 GB / 160.52 ms), 默认流等待D2H时间: 57.29 ms
-rank 0 H2D带宽: 21.89 GB/s (3.416 GB / 156.11 ms), offload 默认流等待H2D时间: 25.73 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.35 ms), offload 默认流等待H2D时间: 65.79 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.33 ms), offload 默认流等待H2D时间: 65.78 ms
-rank 0 activation memory used is 12924.59716796875 MB
-[2025-11-21 11:58:17] [WARNING] [2166818] profiler.py: Profiler is stopped, step takes no effect!
-========== now is iteration 10 ==========
-rank 0 D2H带宽: 20.26 GB/s (3.416 GB / 168.65 ms), 默认流等待D2H时间: 122.69 ms
-rank 0 D2H带宽: 17.17 GB/s (3.416 GB / 198.96 ms), 默认流等待D2H时间: 148.80 ms
-rank 0 D2H带宽: 19.66 GB/s (3.416 GB / 173.82 ms), 默认流等待D2H时间: 119.30 ms
-rank 0 H2D带宽: 19.68 GB/s (3.416 GB / 173.60 ms), offload 默认流等待H2D时间: 0.07 ms
-rank 0 D2H带宽: 20.56 GB/s (3.416 GB / 166.18 ms), 默认流等待D2H时间: 20.84 ms
-rank 0 H2D带宽: 19.59 GB/s (3.416 GB / 174.42 ms), offload 默认流等待H2D时间: 18.15 ms
-rank 0 D2H带宽: 19.52 GB/s (3.416 GB / 175.03 ms), 默认流等待D2H时间: 39.27 ms
-rank 0 H2D带宽: 19.63 GB/s (3.416 GB / 174.07 ms), offload 默认流等待H2D时间: 17.10 ms
-rank 0 D2H带宽: 20.17 GB/s (3.416 GB / 169.39 ms), 默认流等待D2H时间: 19.57 ms
-rank 0 H2D带宽: 19.33 GB/s (3.416 GB / 176.75 ms), offload 默认流等待H2D时间: 24.49 ms
-rank 0 D2H带宽: 20.84 GB/s (3.416 GB / 163.93 ms), 默认流等待D2H时间: 21.23 ms
-rank 0 H2D带宽: 20.84 GB/s (3.416 GB / 163.95 ms), offload 默认流等待H2D时间: 24.18 ms
-rank 0 D2H带宽: 21.16 GB/s (3.416 GB / 161.45 ms), 默认流等待D2H时间: 62.46 ms
-rank 0 H2D带宽: 21.67 GB/s (3.416 GB / 157.64 ms), offload 默认流等待H2D时间: 21.64 ms
-rank 3 activation memory used is 5124.11865234375 MB
-rank 2 activation memory used is 8460.26123046875 MB
-rank 0 H2D带宽: 25.02 GB/s (3.416 GB / 136.54 ms), offload 默认流等待H2D时间: 65.87 ms
-rank 1 activation memory used is 11764.40234375 MB
-rank 0 H2D带宽: 25.06 GB/s (3.416 GB / 136.31 ms), offload 默认流等待H2D时间: 65.53 ms
-rank 0 activation memory used is 12924.59716796875 MB
-Number of parameters in transformer layers in billions:  1.41
-Number of parameters in embedding layers in billions: 0.26
-Total number of parameters in billions: 1.67
-Number of parameters in most loaded shard in billions: 0.4834
-Number of parameters in other shards in billions: 0.3524
-Theoretical memory footprints: weight and optimizer=8298.60 MB
- [2025-11-21 11:58:19] iteration       10/ 4577636 | consumed samples:           80 | elapsed time per iteration (ms): 6616.8 | learning rate: 2.621447E-08 | global batch size:     8 | lm loss: 1.043714E+01 | loss scale: 1.0 | grad norm: 21.327 | number of skipped iterations:   0 | number of nan iterations:   0 |
-[Rank 1] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 18918.07080078125 | reserved: 23336.0 | max reserved: 23336.0
-[Rank 0] (after 10 iterations) memory (MB) | allocated: 9627.67138671875 | max allocated: 22552.2685546875 | reserved: 25076.0 | max reserved: 25076.0
-[Rank 2] (after 10 iterations) memory (MB) | allocated: 7153.66845703125 | max allocated: 15613.9296875 | reserved: 20130.0 | max reserved: 20130.0
-[Rank 3] (after 10 iterations) memory (MB) | allocated: 9403.81591796875 | max allocated: 14527.9345703125 | reserved: 16358.0 | max reserved: 16358.0
-[exiting program at iteration 10] datetime: 2025-11-21 11:58:19 
+WARNING:megatron.core.utils:NPU out of memory. Tried to allocate 8.00 GiB (NPU 1; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.
+['Traceback (most recent call last):\n', '  File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 230, in forward_step\n    output_tensor = model(tokens, position_ids, attention_mask,\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/distributed/distributed_data_parallel.py", line 305, in forward\n    return self.module(*inputs, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/legacy/model/module.py", line 189, in forward\n    outputs = self.module(*inputs, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/models/gpt/gpt_model.py", line 217, in forward\n    hidden_states = self.decoder(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/transformer_block.py", line 218, in wrapper\n    hidden_states = fn(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_block.py", line 462, in forward\n    hidden_states, context = layer(\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 446, in __call__\n    return super(MegatronModule, self).__call__(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 287, in forward\n    attention_output_with_bias = self.self_attention(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/attention.py", line 381, in wrapper\n    output, bias = fn(\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py", line 301, in forward\n    core_attn_out = self.core_attention(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/dot_product_attention.py", line 155, in wrapper\n    return fn(self, query, key, value, attention_mask, attn_mask_type, packed_seq_params)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 200, in forward\n    context = core_attention_forward(attention_scores, value)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 164, in core_attention_forward\n    attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 148, in forward\n    return self.forward_torch_softmax(input, mask)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 206, in forward_torch_softmax\n    probs = torch.nn.Softmax(dim=-1)(mask_output)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1672, in forward\n    return F.softmax(input, self.dim, _stacklevel=5)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/functional.py", line 2140, in softmax\n    ret = input.softmax(dim)\n', 'RuntimeError: NPU out of memory. Tried to allocate 8.00 GiB (NPU 1; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.\n']
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 320, in <module>
+[rank1]:     pretrain(
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 514, in wrapper
+[rank1]:     pretrain(*args, **kwargs)
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/training.py", line 303, in pretrain
+[rank1]:     iteration, num_floating_point_operations_so_far = train(
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 131, in wrapper
+[rank1]:     return train(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/training/training.py", line 1260, in train
+[rank1]:     train_step(forward_step_func,
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 154, in wrapper
+[rank1]:     ret = train_step(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/training/training.py", line 722, in train_step
+[rank1]:     losses_reduced = forward_backward_func(
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/schedules.py", line 1441, in forward_backward_pipelining_without_interleaving
+[rank1]:     output_tensor, num_tokens = forward_step(
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/performance/auto_pipeline_perf/schedules.py", line 55, in wrapper
+[rank1]:     output_tensor = fn(*args, **kwargs)
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/pipeline_parallel/schedules.py", line 164, in forward_step
+[rank1]:     output_tensor, loss_func = forward_step_func(data_iterator, model)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 230, in forward_step
+[rank1]:     output_tensor = model(tokens, position_ids, attention_mask,
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/distributed/distributed_data_parallel.py", line 305, in forward
+[rank1]:     return self.module(*inputs, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/legacy/model/module.py", line 189, in forward
+[rank1]:     outputs = self.module(*inputs, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/models/gpt/gpt_model.py", line 217, in forward
+[rank1]:     hidden_states = self.decoder(
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/transformer_block.py", line 218, in wrapper
+[rank1]:     hidden_states = fn(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_block.py", line 462, in forward
+[rank1]:     hidden_states, context = layer(
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 446, in __call__
+[rank1]:     return super(MegatronModule, self).__call__(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 287, in forward
+[rank1]:     attention_output_with_bias = self.self_attention(
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/attention.py", line 381, in wrapper
+[rank1]:     output, bias = fn(
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py", line 301, in forward
+[rank1]:     core_attn_out = self.core_attention(
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/dot_product_attention.py", line 155, in wrapper
+[rank1]:     return fn(self, query, key, value, attention_mask, attn_mask_type, packed_seq_params)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 200, in forward
+[rank1]:     context = core_attention_forward(attention_scores, value)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 164, in core_attention_forward
+[rank1]:     attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 148, in forward
+[rank1]:     return self.forward_torch_softmax(input, mask)
+[rank1]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 206, in forward_torch_softmax
+[rank1]:     probs = torch.nn.Softmax(dim=-1)(mask_output)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank1]:     return self._call_impl(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank1]:     return forward_call(*args, **kwargs)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1672, in forward
+[rank1]:     return F.softmax(input, self.dim, _stacklevel=5)
+[rank1]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/functional.py", line 2140, in softmax
+[rank1]:     ret = input.softmax(dim)
+[rank1]: RuntimeError: NPU out of memory. Tried to allocate 8.00 GiB (NPU 1; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.
+WARNING:megatron.core.utils:NPU out of memory. Tried to allocate 8.00 GiB (NPU 0; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.
+['Traceback (most recent call last):\n', '  File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 230, in forward_step\n    output_tensor = model(tokens, position_ids, attention_mask,\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/distributed/distributed_data_parallel.py", line 305, in forward\n    return self.module(*inputs, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/legacy/model/module.py", line 189, in forward\n    outputs = self.module(*inputs, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/models/gpt/gpt_model.py", line 217, in forward\n    hidden_states = self.decoder(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/transformer_block.py", line 218, in wrapper\n    hidden_states = fn(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_block.py", line 462, in forward\n    hidden_states, context = layer(\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 446, in __call__\n    return super(MegatronModule, self).__call__(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 287, in forward\n    attention_output_with_bias = self.self_attention(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/attention.py", line 381, in wrapper\n    output, bias = fn(\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py", line 301, in forward\n    core_attn_out = self.core_attention(\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/MindSpeed/mindspeed/core/transformer/dot_product_attention.py", line 155, in wrapper\n    return fn(self, query, key, value, attention_mask, attn_mask_type, packed_seq_params)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 200, in forward\n    context = core_attention_forward(attention_scores, value)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 164, in core_attention_forward\n    attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 148, in forward\n    return self.forward_torch_softmax(input, mask)\n', '  File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 206, in forward_torch_softmax\n    probs = torch.nn.Softmax(dim=-1)(mask_output)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl\n    return forward_call(*args, **kwargs)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1672, in forward\n    return F.softmax(input, self.dim, _stacklevel=5)\n', '  File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/functional.py", line 2140, in softmax\n    ret = input.softmax(dim)\n', 'RuntimeError: NPU out of memory. Tried to allocate 8.00 GiB (NPU 0; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.\n']
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 320, in <module>
+[rank0]:     pretrain(
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 514, in wrapper
+[rank0]:     pretrain(*args, **kwargs)
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/training.py", line 303, in pretrain
+[rank0]:     iteration, num_floating_point_operations_so_far = train(
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 131, in wrapper
+[rank0]:     return train(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/training/training.py", line 1260, in train
+[rank0]:     train_step(forward_step_func,
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/training.py", line 154, in wrapper
+[rank0]:     ret = train_step(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/training/training.py", line 722, in train_step
+[rank0]:     losses_reduced = forward_backward_func(
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/pipeline_parallel/schedules.py", line 1441, in forward_backward_pipelining_without_interleaving
+[rank0]:     output_tensor, num_tokens = forward_step(
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/performance/auto_pipeline_perf/schedules.py", line 55, in wrapper
+[rank0]:     output_tensor = fn(*args, **kwargs)
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/pipeline_parallel/schedules.py", line 164, in forward_step
+[rank0]:     output_tensor, loss_func = forward_step_func(data_iterator, model)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/pretrain_gpt.py", line 230, in forward_step
+[rank0]:     output_tensor = model(tokens, position_ids, attention_mask,
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/distributed/distributed_data_parallel.py", line 305, in forward
+[rank0]:     return self.module(*inputs, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/legacy/model/module.py", line 189, in forward
+[rank0]:     outputs = self.module(*inputs, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/models/gpt/gpt_model.py", line 217, in forward
+[rank0]:     hidden_states = self.decoder(
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/transformer_block.py", line 218, in wrapper
+[rank0]:     hidden_states = fn(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_block.py", line 462, in forward
+[rank0]:     hidden_states, context = layer(
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 446, in __call__
+[rank0]:     return super(MegatronModule, self).__call__(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/transformer_layer.py", line 287, in forward
+[rank0]:     attention_output_with_bias = self.self_attention(
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/attention.py", line 381, in wrapper
+[rank0]:     output, bias = fn(
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/attention.py", line 301, in forward
+[rank0]:     core_attn_out = self.core_attention(
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/MindSpeed/mindspeed/core/transformer/dot_product_attention.py", line 155, in wrapper
+[rank0]:     return fn(self, query, key, value, attention_mask, attn_mask_type, packed_seq_params)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 200, in forward
+[rank0]:     context = core_attention_forward(attention_scores, value)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/transformer/dot_product_attention.py", line 164, in core_attention_forward
+[rank0]:     attention_probs: Tensor = self.scale_mask_softmax(attention_scores, attention_mask)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 148, in forward
+[rank0]:     return self.forward_torch_softmax(input, mask)
+[rank0]:   File "/data0/ssy/Megatron-LM-0.9.0/megatron/core/fusions/fused_softmax.py", line 206, in forward_torch_softmax
+[rank0]:     probs = torch.nn.Softmax(dim=-1)(mask_output)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/modules/activation.py", line 1672, in forward
+[rank0]:     return F.softmax(input, self.dim, _stacklevel=5)
+[rank0]:   File "/data0/ssy/condaEnv/megatron/lib/python3.10/site-packages/torch/nn/functional.py", line 2140, in softmax
+[rank0]:     ret = input.softmax(dim)
+[rank0]: RuntimeError: NPU out of memory. Tried to allocate 8.00 GiB (NPU 0; 60.96 GiB total capacity; 45.23 GiB already allocated; 45.23 GiB current active; 6.71 GiB free; 53.06 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.
+[ERROR] 2025-11-25-15:10:29 (PID:602675, Device:1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+sys:1: ResourceWarning: unclosed file <_io.TextIOWrapper name=103 encoding='UTF-8'>

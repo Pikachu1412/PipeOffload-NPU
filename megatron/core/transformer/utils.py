@@ -33,8 +33,7 @@ def get_default_causal_mask(sq: int) -> torch.Tensor:
 
 
 def attention_mask_func(attention_scores, attention_mask):
-    attention_scores.masked_fill_(attention_mask, -10000.0)
-    return attention_scores
+    return attention_scores.masked_fill(attention_mask, -10000.0)
 
 
 @jit_fuser

@@ -60,8 +60,7 @@ class PartialRecompute(saved_tensors_hooks):
                 if rng_states is not None:
                     current_rng_states = save_rng_states()
                     restore_rng_states(rng_states)
-                # context = self.context if self.context is not None else nullcontext
-                # with context:
+
                 r = function(*parents)
                 if view_size is not None:
                     r = r.view(*view_size)
@@ -72,6 +71,8 @@ class PartialRecompute(saved_tensors_hooks):
             if self.bias != None:
                 r = (r, self.bias)
                 self.bias =None
+            if isinstance(r, tuple):
+                r = r[0]
             return r
         return info
 
@@ -199,14 +200,14 @@ class ActivationStore(saved_tensors_hooks):
             assert (self._offload_tensor_info[len(self._gpu_store) - 1] == tensor_info(tensor))
         self._save_event.record()
         # print(f"rank {torch.distributed.get_rank()} Saving tensor id {len(self._gpu_store) - 1} {id(tensor)} {tensor.shape}, dtype {tensor.dtype}, device {tensor.device} storage {tensor.storage().data_ptr()}")
-        # if len(self._gpu_store)>=44:
+        # if len(self._gpu_store)>=28:
         #     if torch.distributed.get_rank()==0:
         #         print("------------------------------------------")
         #         print(len(self._gpu_store))
         #         for x in self._gpu_store:
         #             print(f"{x.shape} {x.dtype}")
         #         print("------------------------------------------")
-        # if self._gpu_store[-1].shape==torch.Size([4096, 1, 4096]):
+        # if self._gpu_store[-1].shape==torch.Size([4096, 1, 16384]):
         #     print("123")
         return (ActivationStore.SaveType.OFFLOAD, len(self._gpu_store) - 1)
 

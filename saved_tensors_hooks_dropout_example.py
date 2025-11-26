@@ -52,7 +52,7 @@ class DropoutTensorHook:
         print(f"in hook ptr is {x.storage().data_ptr()}")
         self.saved_tensors.append(x)
         self.pack_hook_called = True
-        return x
+        return 123,123
 
     def unpack_hook(self, x):
         """在恢复张量时调用的钩子"""
@@ -89,6 +89,7 @@ def capture_dropout_with_hooks():
             # x = x + bias
             print(f"before ptr is {x.storage().data_ptr()}")
             out = x @ x1
+            print("fewgwr",x,x1)
             # out = torch.nn.functional.dropout(x, p=prob, training=training)
             # out = res + out
         # out = F.dropout(x, p=prob, training=training)

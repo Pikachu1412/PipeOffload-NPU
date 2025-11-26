@@ -30,12 +30,12 @@ export WORLD_SIZE=1
 export RANK=0
 export MASTER_ADDR=localhost
 export MASTER_PORT=6479
-GPUS_PER_NODE=4
+GPUS_PER_NODE=8
 EXIT_INTERVAL=10
 LOG_INTERVAL=10
 WORLD_SIZE_IN_GPUS=$(( $WORLD_SIZE * $GPUS_PER_NODE ))
 
-PIPELINE_SIZE=$GPUS_PER_NODE
+PIPELINE_SIZE=4
 LAYERS=$(( $PIPELINE_SIZE * 2))
 MICRO_BATCH_SIZE=1
 GLOBAL_BATCH_SIZE=$(( 8 ))
@@ -43,8 +43,8 @@ HIDDEN_SIZE=4096
 FFN_HIDDEN_SIZE=16384
 ATTENTION_HEADS=32
 GQA=8
-TP_SIZE=1
-SEQ_LENGTH=$((4096))
+TP_SIZE=2
+SEQ_LENGTH=$((16384))
 
 EVAL_INTERVAL=10000
 
@@ -102,8 +102,9 @@ OFFLOAD_ARGS=(
   --cpu-offload 
   --bind-cpu
   --optimizer-selection fused_torch_adamw 
-  # --sequence-parallel 
+  --sequence-parallel 
   # --recompute-lgd
+  # --recompute
   # --use-legacy-models
   # --ckpt-format torch
   # --recompute-granularity full

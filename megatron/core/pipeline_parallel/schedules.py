@@ -1452,7 +1452,7 @@ def forward_backward_pipelining_without_interleaving(
                 current_microbatch=i,
                 encoder_decoder_xattn=encoder_decoder_xattn,
             )
-        send_forward(output_tensor, send_tensor_shapes, config)
+        
         if do_offload:
             save_input_tensor(input_tensor)
             if i == 0:
@@ -1460,7 +1460,7 @@ def forward_backward_pipelining_without_interleaving(
             if i > 0:
                 activation_store_pool.offload_release()
                 activation_store_pool.offload()
-
+        send_forward(output_tensor, send_tensor_shapes, config)
         total_num_tokens += num_tokens.item()
 
         if not forward_only:
