@@ -1433,7 +1433,7 @@ def forward_backward_pipelining_without_interleaving(
         input_tensor = recv_forward(recv_tensor_shapes, config)
 
         save_act = activation_store_pool.get_for_offload(
-            is_a_view_opti=args.is_a_view_opti) if do_offload else partial_recompute  # contextlib.nullcontext()#
+            is_a_view_opti=args.is_a_view_opti) if do_offload else partial_recompute  #contextlib.nullcontext()# 
 
         # print(f"rank {rank} mb {i} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB, max allocated {torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024} GB,  reserved {torch.cuda.memory_reserved() / 1024 / 1024 / 1024} GB, max reserved {torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024} GB, cpumemory {process.memory_info().rss / 1024 / 1024 / 1024} GB")
         with save_act:
@@ -1489,7 +1489,7 @@ def forward_backward_pipelining_without_interleaving(
         if do_offload:
             save_act = activation_store_pool.get_for_offload(is_a_view_opti=args.is_a_view_opti)
         else:
-            save_act = partial_recompute  # contextlib.nullcontext()#
+            save_act = partial_recompute  #contextlib.nullcontext()#
         # print(f"rank {rank} mb {i + num_warmup_microbatches} allocated memory {torch.cuda.memory_allocated() / 1024 / 1024 / 1024} GB")
         if do_offload and i == 0:
             activation_store_pool.prepare_resume()

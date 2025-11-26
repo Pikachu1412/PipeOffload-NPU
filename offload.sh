@@ -30,7 +30,7 @@ export WORLD_SIZE=1
 export RANK=0
 export MASTER_ADDR=localhost
 export MASTER_PORT=6479
-GPUS_PER_NODE=8
+GPUS_PER_NODE=4
 EXIT_INTERVAL=10
 LOG_INTERVAL=10
 WORLD_SIZE_IN_GPUS=$(( $WORLD_SIZE * $GPUS_PER_NODE ))
@@ -43,8 +43,8 @@ HIDDEN_SIZE=4096
 FFN_HIDDEN_SIZE=16384
 ATTENTION_HEADS=32
 GQA=8
-TP_SIZE=2
-SEQ_LENGTH=$((16384))
+TP_SIZE=1
+SEQ_LENGTH=$((8192))
 
 EVAL_INTERVAL=10000
 
@@ -85,6 +85,7 @@ options=" \
   --init-method-std 0.006 \
   --no-barrier-with-level-1-timing \
   --transformer-impl local \
+  --no-persist-layer-norm \
   --no-bias-dropout-fusion \
   --no-create-attention-mask-in-dataloader \
   --untie-embeddings-and-output-weights \
@@ -104,15 +105,14 @@ OFFLOAD_ARGS=(
   --optimizer-selection fused_torch_adamw 
   --sequence-parallel 
   # --recompute-lgd
-  # --recompute
+  --recompute
   # --use-legacy-models
   # --ckpt-format torch
   # --recompute-granularity full
   # --recompute-method block
-  # --recompute-num-layers 2
+  # --recompute-num-layers 1
   --profile
   --profile-ranks 0 1
-  --use-pytorch-profiler
   --profile-step-start 3
   --profile-step-end 5
 )

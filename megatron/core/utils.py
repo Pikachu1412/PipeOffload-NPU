@@ -21,7 +21,9 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import torch
-import torch_npu
+from tools.utils import is_npu_available
+if is_npu_available():
+    import torch_npu
 from packaging.version import Version as PkgVersion
 
 from megatron.core import parallel_state
@@ -1308,34 +1310,6 @@ def is_float8tensor(tensor: torch.Tensor) -> bool:
     """Check if a tensor is a Transformer Engine Float8Tensor"""
     return HAVE_TE_FLOAT8TENSOR and isinstance(tensor, Float8Tensor)
 
-
-# Check if NPU is available
-_NPU_AVAILABLE = None
-
-
-def is_npu_available() -> bool:
-    """Check if NPU (Ascend) is available in the current environment.
-
-    This function checks whether the torch_npu package is installed and
-    if there are available NPU devices.
-
-    Returns:
-        bool: True if NPU is available, False otherwise.
-    """
-    global _NPU_AVAILABLE
-
-    if _NPU_AVAILABLE is not None:
-        return _NPU_AVAILABLE
-
-    try:
-        import torch_npu
-        _NPU_AVAILABLE = torch_npu.npu.is_available() if hasattr(
-            torch_npu.npu, 'is_available') else torch_npu.npu.device_count() > 0
-    except (ImportError, ModuleNotFoundError):
-        _NPU_AVAILABLE = False
-
-    return _NPU_AVAILABLE
-
 def timing_wait(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -1351,24 +1325,25 @@ static_cnt = {}
 def record_memory_delta_and_time(event_name: str = "event", device: Optional[Union[int, torch.device]] = None):
     yield
     return
+    npu = is_npu_available()
     if torch.distributed.get_rank() != 0:
         yield
         return
-    device = torch_npu.npu.current_device()
-    # 查询指定NPU设备的已分配内存
-    start_allocated = torch_npu.npu.memory_allocated(device)
-    # device = torch.cuda.current_device() if device is None else device
-    # torch.cuda.synchronize(device)
-    # start_allocated = torch.cuda.memory_allocated(device)
+    if npu:
+        device = torch_npu.npu.current_device()
+        start_allocated = torch_npu.npu.memory_allocated(device)
+    else:
+        device = torch.cuda.current_device() if device is None else device
+        start_allocated = torch.cuda.memory_allocated(device)
     start_time = time.perf_counter()
     try:
         yield
     finally:
         wait_time = (time.perf_counter() - start_time) * 1000
-        # torch.cuda.synchronize(device)
-        end_allocated = torch_npu.npu.memory_allocated(device)
-        # end_allocated = torch.cuda.memory_allocated(device)
-        # end_reserved = torch.cuda.memory_reserved(device)
+        if npu:
+            end_allocated = torch_npu.npu.memory_allocated(device)
+        else:
+            end_allocated = torch.cuda.memory_allocated(device)
         delta_allocated = (end_allocated - start_allocated) / (1024 * 1024)
         global static_time
         global static_cnt

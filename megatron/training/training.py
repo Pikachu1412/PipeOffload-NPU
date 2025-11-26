@@ -11,7 +11,6 @@ import math
 import os
 import sys
 
-import torch_npu
 from .log_handler import CustomHandler
 # Make default logging level INFO, but filter out all log messages not from MCore.
 logging.basicConfig(handlers=[CustomHandler()], level=logging.INFO)
@@ -20,14 +19,13 @@ import time
 # The earliest we can measure the start time.
 _TRAIN_START_TIME = time.time()
 import torch
-
+from tools.utils import is_npu_available
 from megatron.core import mpu, tensor_parallel
 from megatron.core.utils import (
     check_param_hashes_across_dp_replicas,
     get_model_config,
     StragglerDetector,
     is_float8tensor,
-    is_npu_available,
 )
 from megatron.training.checkpointing import load_checkpoint
 from megatron.training.checkpointing import save_checkpoint
@@ -1199,7 +1197,8 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
         with one_logger.get_context_manager():
             one_logger.store_set('get_e2e_base_metrics', get_e2e_base_metrics)
 
-    if args.profile and args.rank in args.profile_ranks and args.use_pytorch_profiler:
+    prof = None
+    if args.profile and args.rank in args.profile_ranks:
         if not is_npu_available():
             prof = torch.profiler.profile(
             schedule=torch.profiler.schedule(
@@ -1209,8 +1208,12 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
                 repeat=1),
             on_trace_ready=torch.profiler.tensorboard_trace_handler(args.tensorboard_dir),
             record_shapes=True,
-            with_stack=True)
+            profile_memory=True,
+            with_stack=True,
+            with_modules=True,
+            with_flops=True)
         else:
+            import torch_npu
             prof = torch_npu.profiler.profile(
                 activities=[
                         torch_npu.profiler.ProfilerActivity.CPU,
@@ -1230,7 +1233,7 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
 
     while iteration < args.train_iters:
         if args.profile and args.rank in args.profile_ranks:
-            if args.use_pytorch_profiler:
+            if prof is not None:
                 prof.step()
             elif iteration == args.profile_step_start:
                 torch.cuda.cudart().cudaProfilerStart()
@@ -1441,9 +1444,13 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
 
         if args.profile and \
             iteration == args.profile_step_end and \
-            args.rank in args.profile_ranks:
-            if args.use_pytorch_profiler:
-                prof.stop()
+            args.rank in args.profile_ranks:    
+            if prof is not None:
+                try:
+                    prof.stop()
+                except RuntimeError as e:
+                    if "not running" not in str(e):
+                        raise
             else:
                 torch.cuda.cudart().cudaProfilerStop()
 

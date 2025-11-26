@@ -6,7 +6,9 @@ import torch
 from functools import partial
 from contextlib import nullcontext
 import inspect
-import mindspeed.megatron_adaptor
+from tools.utils import is_npu_available
+if is_npu_available():
+    import mindspeed.megatron_adaptor
 from typing import Union
 from megatron.training import get_args
 from megatron.training import print_rank_0

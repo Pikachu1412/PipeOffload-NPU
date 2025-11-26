@@ -1126,10 +1126,6 @@ def _add_training_args(parser):
                        help='Global step to start profiling.')
     group.add_argument('--profile-step-end', type=int, default=12,
                        help='Global step to stop profiling.')
-    group.add_argument('--use-pytorch-profiler', action='store_true',
-                       help='Use the built-in pytorch profiler. '
-                       'Useful if you wish to view profiles in tensorboard.',
-                       dest='use_pytorch_profiler')
     group.add_argument('--profile-ranks', nargs='+', type=int, default=[0],
                        help='Global ranks to profile.')
     group.add_argument('--tp-comm-overlap', action='store_true', help='Enables the '
@@ -1282,7 +1278,7 @@ def _add_training_args(parser):
     group.add_argument('--recompute-lgd', action='store_true',
                        help='Recompute layernorm, gelu and dropout.')
     group.add_argument('--recompute', action='store_true',
-                       help='core_attn,mlp')
+                       help='core_attn,mlp,layernorm')
     group.add_argument('--measure-activation-memory', action='store_true',
                        help='Measure activation memory.')
     group.add_argument('--offload-continuous-buffers', action='store_true',

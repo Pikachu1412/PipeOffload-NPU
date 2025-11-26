@@ -2,7 +2,7 @@
 
 """GPT-2 model."""
 
-from ssy_utils import print_rank_0
+from tools.utils import print_rank_0
 import torch
 
 from megatron.training import get_args

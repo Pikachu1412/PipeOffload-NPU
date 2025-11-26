@@ -14,8 +14,8 @@ from megatron.core.transformer.identity_op import IdentityFuncOp, IdentityOp
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.spec_utils import ModuleSpec, build_module
 from megatron.core.transformer.transformer_config import TransformerConfig
-from megatron.core.utils import is_npu_available, make_viewless_tensor, record_memory_delta_and_time
-
+from megatron.core.utils import make_viewless_tensor, record_memory_delta_and_time
+from tools.utils import is_npu_available
 
 @dataclass
 class TransformerLayerSubmodules:
