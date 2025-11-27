@@ -44,7 +44,7 @@ FFN_HIDDEN_SIZE=16384
 ATTENTION_HEADS=32
 GQA=8
 TP_SIZE=1
-SEQ_LENGTH=$((8192))
+SEQ_LENGTH=$((4096))
 
 EVAL_INTERVAL=10000
 
@@ -102,7 +102,7 @@ OFFLOAD_ARGS=(
   --tensorboard-dir ./logs/test
   --cpu-offload 
   --bind-cpu
-  --optimizer-selection fused_torch_adamw 
+  # --optimizer-selection fused_torch_adamw 
   --sequence-parallel 
   # --recompute-lgd
   --recompute

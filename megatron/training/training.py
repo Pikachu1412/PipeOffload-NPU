@@ -20,7 +20,7 @@ import time
 _TRAIN_START_TIME = time.time()
 import torch
 from tools.utils import is_npu_available
-from megatron.core import mpu, tensor_parallel
+from megatron.core import mpu, tensor_parallel, gpu_affinity
 from megatron.core.utils import (
     check_param_hashes_across_dp_replicas,
     get_model_config,
@@ -189,6 +189,24 @@ def get_start_time_from_progress_log():
     return datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S'), \
         start_num_floating_point_operations
 
+def setup_gpu_affinity():
+    if "RANK" not in os.environ:
+        raise RuntimeError("env var RANK is not set. Probably not run by torchrun.")
+    rank = int(os.environ["RANK"])
+    local_rank = rank % torch.cuda.device_count()
+    if os.environ.get('CUDA_VISIBLE_DEVICES') is not None:
+        gpu_id = int(os.environ.get('CUDA_VISIBLE_DEVICES').split(',')[local_rank])
+    else:
+        gpu_id = local_rank
+
+    nproc_per_node = torch.cuda.device_count()
+    try:
+        affinity = gpu_affinity.set_affinity(gpu_id, nproc_per_node)
+        cpus = sorted(list(affinity))
+        print(f"rank {rank} gpu {gpu_id} Setting affinity to {cpus}")
+    except gpu_affinity.GPUAffinityError as e:
+        print(f"rank {rank} gpu {gpu_id} Warning: Failed to set GPU affinity: {e}")
+        print(f"rank {rank} gpu {gpu_id} Continuing without setting affinity...")
 
 def pretrain(
     train_valid_test_dataset_provider,
@@ -229,7 +247,8 @@ def pretrain(
         args_defaults: a dictionary from argument-name to argument-value. It
             to set already parse arguments.
     """
-
+    if not is_npu_available():
+        setup_gpu_affinity()
     # Initalize and get arguments, timers, and Tensorboard writer.
     initialize_megatron(
         extra_args_provider=extra_args_provider,
